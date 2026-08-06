@@ -74,13 +74,31 @@ RETURN t { .id, .name, .summary, .category, .level, .estHours, .goals } AS topic
 `;
 
 /**
- * Multi-hop subgraph around a topic (variable-length REQUIRES traversal,
- * depth `maxDepth`). Returns every node within `maxDepth` REQUIRES hops.
+ * Multi-hop subgraph around a topic. CognoDB does not accept a parameter
+ * inside a variable-length relationship (`*0..$n`), so a fixed set of
+ * depth-limited query variants is selected by the service (never
+ * concatenated from user input).
  */
-export const SUBGRAPH_NODES = `
-MATCH (start:Topic { id: $id })-[:REQUIRES*0..$maxDepth]-(t:Topic)
+const SUBGRAPH_NODES_2 = `
+MATCH (start:Topic { id: $id })-[:REQUIRES*0..2]-(t:Topic)
 RETURN DISTINCT t { .id, .name, .summary, .category, .level, .estHours } AS node
 `;
+
+const SUBGRAPH_NODES_3 = `
+MATCH (start:Topic { id: $id })-[:REQUIRES*0..3]-(t:Topic)
+RETURN DISTINCT t { .id, .name, .summary, .category, .level, .estHours } AS node
+`;
+
+const SUBGRAPH_NODES_4 = `
+MATCH (start:Topic { id: $id })-[:REQUIRES*0..4]-(t:Topic)
+RETURN DISTINCT t { .id, .name, .summary, .category, .level, .estHours } AS node
+`;
+
+export const SUBGRAPH_NODES = {
+  2: SUBGRAPH_NODES_2,
+  3: SUBGRAPH_NODES_3,
+  4: SUBGRAPH_NODES_4,
+};
 
 /** Edges among a given set of topic ids. */
 export const SUBGRAPH_EDGES = `

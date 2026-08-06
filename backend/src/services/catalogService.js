@@ -45,7 +45,9 @@ export async function getTopicDetail(id) {
 }
 
 export async function getSubgraph(id, maxDepth = 2) {
-  const nodeRows = await runQuery(getDriver(), q.SUBGRAPH_NODES, { id, maxDepth });
+  const clamped = Math.min(Math.max(maxDepth, 2), 4);
+  const statement = q.SUBGRAPH_NODES[clamped] || q.SUBGRAPH_NODES[2];
+  const nodeRows = await runQuery(getDriver(), statement, { id });
   const nodes = nodeRows.map((r) => r.node);
   const ids = nodes.map((n) => n.id);
   const edgeRows = ids.length ? await runQuery(getDriver(), q.SUBGRAPH_EDGES, { ids }) : [];
