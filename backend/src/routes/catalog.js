@@ -46,4 +46,8 @@ router.get('/skills', async (req, res) => {
   res.json(await catalogService.listSkills({ withDemand }));
 });
 
+router.get('/graph', async (req, res) => {
+  res.json(await catalogService.getTopicGraph());
+});
+
 export default router;

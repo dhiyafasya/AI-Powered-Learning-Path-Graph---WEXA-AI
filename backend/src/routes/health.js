@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { ping, DbUnavailableError } from '../db/driver.js';
+import { ping } from '../db/driver.js';
 import { getStats } from '../services/catalogService.js';
 
 const router = Router();
@@ -25,6 +25,4 @@ router.get('/', async (req, res) => {
   });
 });
 
-// Shared by other routers via a helper
-export { DbUnavailableError };
 export default router;
