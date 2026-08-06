@@ -154,12 +154,16 @@ erDiagram
 
 ### Node & relationship properties
 
+Identifiers are namespaced by node type so the schema reads clearly in the
+database (`Topic.id_topic`, `Path.id_path`, `Skill.id_skill`, `User.id_user`).
+The API projects them back to a plain `id` so consumers always see `{ id, … }`.
+
 | Entity | Key properties |
 | --- | --- |
-| `Topic` | `id`, `name`, `summary`, `category`, `level` (`beginner`/`intermediate`/`advanced`), `estHours`, `goals[]` |
-| `Skill` | `id`, `name`, `description` |
-| `Path` | `id`, `name`, `tagline`, `description`, `icon` |
-| `User` | `id`, `name`, `avatarColor`, `focus` |
+| `Topic` | `id_topic`, `name`, `summary`, `category`, `level` (`beginner`/`intermediate`/`advanced`), `estHours`, `goals[]` |
+| `Skill` | `id_skill`, `name`, `description` |
+| `Path` | `id_path`, `name`, `tagline`, `description`, `icon` |
+| `User` | `id_user`, `name`, `avatarColor`, `focus` |
 | `REQUIRES` | direction: `source` depends on `target` |
 | `CONTAINS` | `order` (position within the path) |
 | `COMPLETED` | `score`, `completedAt` |
@@ -178,20 +182,22 @@ string-concatenated Cypher anywhere. Highlights:
 ### 1. Multi-hop traversal — the full prerequisite closure
 
 ```cypher
-MATCH (start:Topic { id: $id })-[:REQUIRES*0..$maxDepth]-(t:Topic)
-RETURN DISTINCT t { .id, .name, .summary, .category, .level, .estHours } AS node
+MATCH (start:Topic { id_topic: $id })-[:REQUIRES*0..2]-(t:Topic)
+RETURN DISTINCT t { id: t.id_topic, .name, .summary, .category, .level, .estHours } AS node
 ```
 
 Used by the **neighbourhood map** on a topic page. `*0..N` is a variable-length relationship
-pattern — a relational equivalent needs an unbounded recursive CTE.
+pattern — a relational equivalent needs an unbounded recursive CTE. (CognoDB doesn't accept a
+parameter inside the `*0..N` bound, so the code ships three fixed-depth variants for depths 2–4,
+selected server-side — still no concatenation.)
 
 ### 2. Path generation (multi-hop, done in the engine)
 
 ```cypher
 MATCH (t:Topic)
 OPTIONAL MATCH (t)-[:REQUIRES]->(pr:Topic)
-RETURN t { .id, .name, .summary, .category, .level, .estHours } AS topic,
-       collect(pr.id) AS requires
+RETURN t { id: t.id_topic, .name, .summary, .category, .level, .estHours } AS topic,
+       collect(pr.id_topic) AS requires
 ```
 
 The engine (`backend/src/services/pathEngine.js`) then computes the transitive prerequisite closure
@@ -202,10 +208,10 @@ multi-hop graph operation; the ordering/scoring is pure, unit-tested logic.
 
 ```cypher
 MATCH (t:Topic)-[:TEACHES]->(s:Skill)
-WITH s, collect(DISTINCT t.id) AS taughtBy
+WITH s, collect(DISTINCT t.id_topic) AS taughtBy
 OPTIONAL MATCH (blocked:Topic)-[:REQUIRES*1..2]->(pr:Topic)-[:TEACHES]->(s)
-WHERE NOT blocked.id IN taughtBy
-RETURN s { .id, .name, .description } AS skill,
+WHERE NOT blocked.id_topic IN taughtBy
+RETURN s { id: s.id_skill, .name, .description } AS skill,
        size(taughtBy) AS taughtByCount,
        count(DISTINCT blocked) AS demandCount
 ORDER BY demandCount DESC, taughtByCount DESC
@@ -219,8 +225,8 @@ SQL would be a self-join over a junction table with no clean bound on depth.
 A natural set-intersection over patterns that would be several joins in SQL:
 
 ```cypher
-MATCH (a:Topic { id: $a })-[:REQUIRES]->(shared)<-[:REQUIRES]-(b:Topic { id: $b })
-RETURN shared { .id, .name }
+MATCH (a:Topic { id_topic: $a })-[:REQUIRES]->(shared)<-[:REQUIRES]-(b:Topic { id_topic: $b })
+RETURN shared { id: shared.id_topic, .name }
 ```
 
 ---

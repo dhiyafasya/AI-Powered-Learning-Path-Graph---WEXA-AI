@@ -49,7 +49,7 @@ async function main() {
   // 1. Topics ------------------------------------------------------------
   for (const t of seedTopics) {
     await run(
-      `MERGE (t:Topic { id: $id })
+      `MERGE (t:Topic { id_topic: $id })
        ON CREATE SET t.createdAt = datetime()
        SET t.name = $name,
            t.category = $category,
@@ -57,7 +57,7 @@ async function main() {
            t.estHours = $estHours,
            t.summary = $summary,
            t.goals = $goals`,
-      t
+      { id: t.id_topic, ...t }
     );
   }
   console.log(`[seed] ${seedTopics.length} topics upserted.`);
@@ -65,8 +65,8 @@ async function main() {
   // 2. Prerequisite relationships ----------------------------------------
   for (const [source, target] of REQUIRES) {
     await run(
-      `MATCH (a:Topic { id: $source })
-       MATCH (b:Topic { id: $target })
+      `MATCH (a:Topic { id_topic: $source })
+       MATCH (b:Topic { id_topic: $target })
        MERGE (a)-[:REQUIRES]->(b)`,
       { source, target }
     );
@@ -77,17 +77,17 @@ async function main() {
   let teachesCount = 0;
   for (const s of seedSkills) {
     await run(
-      `MERGE (s:Skill { id: $id })
+      `MERGE (s:Skill { id_skill: $id })
        ON CREATE SET s.createdAt = datetime()
        SET s.name = $name, s.description = $description`,
-      s
+      { id: s.id_skill, ...s }
     );
     for (const topicId of s.taughtBy) {
       await run(
-        `MATCH (topic:Topic { id: $topicId })
-         MATCH (skill:Skill { id: $skillId })
+        `MATCH (topic:Topic { id_topic: $topicId })
+         MATCH (skill:Skill { id_skill: $skillId })
          MERGE (topic)-[:TEACHES]->(skill)`,
-        { topicId, skillId: s.id }
+        { topicId, skillId: s.id_skill }
       );
       teachesCount += 1;
     }
@@ -97,19 +97,19 @@ async function main() {
   // 4. Learning paths + CONTAINS -----------------------------------------
   for (const p of seedPaths) {
     await run(
-      `MERGE (p:Path { id: $id })
+      `MERGE (p:Path { id_path: $id })
        ON CREATE SET p.createdAt = datetime()
        SET p.name = $name, p.tagline = $tagline, p.description = $description, p.icon = $icon`,
-      p
+      { id: p.id_path, ...p }
     );
     for (let i = 0; i < p.topics.length; i += 1) {
       const topicId = p.topics[i];
       await run(
-        `MATCH (p:Path { id: $pathId })
-         MATCH (t:Topic { id: $topicId })
+        `MATCH (p:Path { id_path: $pathId })
+         MATCH (t:Topic { id_topic: $topicId })
          MERGE (p)-[c:CONTAINS]->(t)
          SET c.order = $order`,
-        { pathId: p.id, topicId, order: i }
+        { pathId: p.id_path, topicId, order: i }
       );
     }
   }
@@ -119,27 +119,27 @@ async function main() {
   let completedCount = 0;
   for (const u of seedUsers) {
     await run(
-      `MERGE (u:User { id: $id })
+      `MERGE (u:User { id_user: $id })
        ON CREATE SET u.createdAt = datetime()
        SET u.name = $name, u.avatarColor = $avatarColor, u.focus = $focus`,
-      u
+      { id: u.id_user, ...u }
     );
     if (u.enrolledPathId) {
       await run(
-        `MATCH (u:User { id: $userId })
-         MATCH (p:Path { id: $pathId })
+        `MATCH (u:User { id_user: $userId })
+         MATCH (p:Path { id_path: $pathId })
          MERGE (u)-[:ENROLLED_IN]->(p)`,
-        { userId: u.id, pathId: u.enrolledPathId }
+        { userId: u.id_user, pathId: u.enrolledPathId }
       );
     }
     for (const topicId of u.completed) {
       await run(
-        `MATCH (u:User { id: $userId })
-         MATCH (t:Topic { id: $topicId })
+        `MATCH (u:User { id_user: $userId })
+         MATCH (t:Topic { id_topic: $topicId })
          MERGE (u)-[c:COMPLETED]->(t)
          ON CREATE SET c.completedAt = datetime(), c.score = 100
          ON MATCH SET c.completedAt = datetime(), c.score = 100`,
-        { userId: u.id, topicId }
+        { userId: u.id_user, topicId }
       );
       completedCount += 1;
     }
