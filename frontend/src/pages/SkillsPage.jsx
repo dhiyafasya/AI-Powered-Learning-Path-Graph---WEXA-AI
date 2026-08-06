@@ -5,9 +5,9 @@ import { Loading, ErrorState, EmptyState } from '../components/States.jsx';
 function DemandBar({ count }) {
   const width = Math.min(100, Math.max(4, (count || 0) * 14));
   return (
-    <div style={{ flex: 1, minWidth: 120 }}>
-      <div style={{ height: 8, background: '#eef1f8', borderRadius: 999, overflow: 'hidden' }}>
-        <div style={{ width: `${width}%`, height: '100%', background: 'linear-gradient(90deg,#6366f1,#8b5cf6)', borderRadius: 999 }} />
+    <div className="demand-bar">
+      <div className="demand-track">
+        <div className="demand-fill" style={{ width: `${width}%` }} />
       </div>
     </div>
   );
@@ -39,10 +39,10 @@ export default function SkillsPage() {
       </p>
 
       <div className="card card-pad mt-6">
-        <div className="row" style={{ fontWeight: 600, fontSize: 12, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--muted)' }}>
+        <div className="row skills-head">
           <div className="flex-1">Skill</div>
-          <div style={{ width: 120, textAlign: 'right' }}>taught by</div>
-          <div style={{ width: 130, textAlign: 'right' }}>demand</div>
+          <div className="taught-col">taught by</div>
+          <div className="demand-col">demand</div>
         </div>
         {data.map((s) => (
           <div className="row" key={s.id}>
@@ -51,12 +51,12 @@ export default function SkillsPage() {
               <div className="row-sub">{s.description}</div>
             </div>
             <DemandBar count={(s.demandCount || 0) / maxDemand * 7} />
-            <div className="mono muted" style={{ width: 120, textAlign: 'right', fontSize: 14 }}>
+            <div className="mono muted taught-col">
               {s.taughtByCount} topics
             </div>
-            <div className="mono" style={{ width: 130, textAlign: 'right', fontSize: 15, fontWeight: 700 }}>
+            <div className="mono demand-col">
               {s.demandCount}
-              <span className="muted" style={{ fontSize: 12, fontWeight: 500 }}> blocked</span>
+              <span className="muted demand-sub"> blocked</span>
             </div>
           </div>
         ))}

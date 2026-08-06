@@ -5,7 +5,7 @@ import { useApi } from '../hooks/useApi.js';
 import { api } from '../api/client.js';
 import { Loading, ErrorState, EmptyState } from '../components/States.jsx';
 import GraphCanvas from '../components/GraphCanvas.jsx';
-import { CATEGORY_COLORS } from '../lib/format.js';
+import { categoryTone } from '../lib/format.js';
 
 export default function ExplorerPage() {
   const navigate = useNavigate();
@@ -47,12 +47,11 @@ export default function ExplorerPage() {
         node to open it, or filter to one category.
       </p>
 
-      <div className="flex gap-3 wrap items-center mt-6" style={{ marginBottom: 16 }}>
-        <div style={{ position: 'relative', flex: '1 1 260px' }}>
-          <Search size={16} style={{ position: 'absolute', left: 12, top: 12, color: 'var(--faint)' }} />
+      <div className="filter-row mt-6">
+        <div className="search-box">
+          <Search size={16} />
           <input
-            className="input"
-            style={{ paddingLeft: 36 }}
+            className="input input-search"
             placeholder="Find a topic…"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
@@ -65,16 +64,19 @@ export default function ExplorerPage() {
           >
             All
           </button>
-          {categories.map((c) => (
-            <button
-              key={c}
-              className={`btn btn-sm${category === c ? ' btn-primary' : ''}`}
-              onClick={() => setCategory(category === c ? '' : c)}
-            >
-              <span className="dot" style={{ background: CATEGORY_COLORS[c] || '#94a3b8' }} />
-              {c}
-            </button>
-          ))}
+          {categories.map((c) => {
+            const tone = categoryTone(c);
+            return (
+              <button
+                key={c}
+                className={`btn btn-sm${category === c ? ' btn-primary' : ''}`}
+                onClick={() => setCategory(category === c ? '' : c)}
+              >
+                <span className={`dot ${tone ? `cat-dot-${tone}` : 'cat-dot-muted'}`} />
+                {c}
+              </button>
+            );
+          })}
         </div>
       </div>
 
@@ -93,19 +95,19 @@ export default function ExplorerPage() {
         />
       )}
 
-      <div className="card card-pad mt-6" style={{ display: 'flex', gap: 20, flexWrap: 'wrap', alignItems: 'center' }}>
+      <div className="card card-pad mt-6 legend">
         <span className="eyebrow">Legend</span>
-        <span className="flex items-center gap-2" style={{ fontSize: 13, color: 'var(--ink-soft)' }}>
-          <span className="dot" style={{ background: '#10b981' }} /> beginner
+        <span className="legend-item">
+          <span className="dot dot-beginner" /> beginner
         </span>
-        <span className="flex items-center gap-2" style={{ fontSize: 13, color: 'var(--ink-soft)' }}>
-          <span className="dot" style={{ background: '#0ea5e9' }} /> intermediate
+        <span className="legend-item">
+          <span className="dot dot-intermediate" /> intermediate
         </span>
-        <span className="flex items-center gap-2" style={{ fontSize: 13, color: 'var(--ink-soft)' }}>
-          <span className="dot" style={{ background: '#8b5cf6' }} /> advanced
+        <span className="legend-item">
+          <span className="dot dot-advanced" /> advanced
         </span>
-        <span className="flex items-center gap-2" style={{ fontSize: 13, color: 'var(--ink-soft)' }}>
-          <span style={{ width: 26, height: 0, borderTop: '2px solid #94a3b8' }} /> requires
+        <span className="legend-item">
+          <span className="dot-requires" /> requires
         </span>
       </div>
     </div>

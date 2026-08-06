@@ -40,11 +40,11 @@ export default function PathDetailPage() {
 
   return (
     <div>
-      <Link to="/paths" className="flex items-center gap-2 muted" style={{ fontSize: 14, marginBottom: 16 }}>
+      <Link to="/paths" className="back-link">
         <ArrowLeft size={15} /> All paths
       </Link>
 
-      <div className="hero" style={{ padding: '26px 28px' }}>
+      <div className="hero hero-compact">
         <div className="flex items-center gap-3 wrap">
           <span className="eyebrow">{detail.topics.length} topics · {totalHours}h total</span>
         </div>
@@ -63,16 +63,16 @@ export default function PathDetailPage() {
       </div>
 
       <h2 className="section-title mt-6">Path map</h2>
-      <p className="muted" style={{ marginBottom: 12, fontSize: 14 }}>
-        Topics flow left-to-right. An arrow from a topic to the left means “this topic requires that
-        one first”.
+      <p className="page-note">
+        Topics flow left-to-right. An arrow from a topic to the left means "this topic requires that
+        one first".
       </p>
       <GraphCanvas nodes={nodes} edges={edges} height={440} />
 
       <h2 className="section-title mt-6">Curriculum</h2>
       <div className="card card-pad">
         {detail.topics.map((t, i) => (
-          <Link to={`/topics/${t.id}`} key={t.id} className="row card-hover" style={{ borderRadius: 8 }}>
+          <Link to={`/topics/${t.id}`} key={t.id} className="row card-hover row-rounded">
             <span className="row-index">{i + 1}</span>
             <div className="row-main">
               <div className="row-title">{t.name}</div>
@@ -82,7 +82,7 @@ export default function PathDetailPage() {
             </div>
             <div className="flex items-center gap-2">
               <span className={`pill pill-${t.level}`}>{t.level}</span>
-              <span className="pill" style={{ background: '#f1f5f9', color: '#334155' }}>
+              <span className="pill pill-neutral">
                 <Clock size={12} /> {formatHours(t.estHours)}
               </span>
               <BookOpen size={15} className="muted" />

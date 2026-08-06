@@ -4,6 +4,7 @@ import { useApi } from '../hooks/useApi.js';
 import { api } from '../api/client.js';
 import { Loading, ErrorState, EmptyState } from '../components/States.jsx';
 import PathIcon from '../components/PathIcon.jsx';
+import { pathTone } from '../lib/format.js';
 
 export default function PathsPage() {
   const { data, loading, error, refresh } = useApi(() => api.listPaths(), []);
@@ -28,28 +29,28 @@ export default function PathsPage() {
       </p>
 
       <div className="card-grid mt-6">
-        {data.map((p) => (
-          <Link to={`/paths/${p.id}`} key={p.id} className="card card-pad card-hover">
-            <div className="flex items-center gap-3" style={{ marginBottom: 12 }}>
-              <div
-                className="stat-icon"
-                style={{ background: 'linear-gradient(135deg, #eef2ff, #fdf4ff)', color: '#6d28d9' }}
-              >
-                <PathIcon icon={p.icon} />
+        {data.map((p) => {
+          const tone = pathTone(p.icon);
+          return (
+            <Link to={`/paths/${p.id}`} key={p.id} className="card card-pad card-hover path-card">
+              <div className="path-card-head">
+                <div className={`stat-icon path-tile-${tone}`}>
+                  <PathIcon icon={p.icon} />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="path-card-title">{p.name}</div>
+                  <div className="path-card-sub">{p.tagline}</div>
+                </div>
               </div>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontWeight: 700, fontSize: 16 }}>{p.name}</div>
-                <div className="muted" style={{ fontSize: 13 }}>{p.tagline}</div>
+              <div className="flex items-center justify-between path-card-pill">
+                <span className={`pill path-pill-${tone}`}>
+                  <BookOpen size={12} /> {p.topicCount} topics
+                </span>
+                <ArrowRight size={16} className="muted" />
               </div>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="pill status-done">
-                <BookOpen size={12} /> {p.topicCount} topics
-              </span>
-              <ArrowRight size={16} className="muted" />
-            </div>
-          </Link>
-        ))}
+            </Link>
+          );
+        })}
       </div>
     </div>
   );

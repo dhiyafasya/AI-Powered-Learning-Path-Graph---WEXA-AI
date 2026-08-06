@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { NavLink, Outlet, Link, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard,
@@ -6,12 +7,12 @@ import {
   Sparkles,
   Network,
   Layers,
-  GraduationCap,
   Database,
-  DatabaseZap,
   CircleDashed,
   LogIn,
   LogOut,
+  Menu,
+  X,
 } from 'lucide-react';
 import { useApi } from '../hooks/useApi.js';
 import { api } from '../api/client.js';
@@ -24,7 +25,6 @@ const NAV = [
   { to: '/topics', label: 'Topics', icon: BookOpen },
   { to: '/explore', label: 'Graph Explorer', icon: Network },
   { to: '/skills', label: 'Skills', icon: Layers },
-  { to: '/learners', label: 'Learners', icon: GraduationCap },
 ];
 
 const TITLES = {
@@ -34,7 +34,6 @@ const TITLES = {
   '/topics': 'Topics',
   '/explore': 'Graph Explorer',
   '/skills': 'Skills',
-  '/learners': 'Learners',
 };
 
 function titleFor(pathname) {
@@ -45,7 +44,7 @@ function titleFor(pathname) {
 }
 
 function DbPill({ status }) {
-  if (!status) return <span className="pill" style={{ background: '#f1f5f9', color: '#64748b' }}><CircleDashed size={12} /> checking…</span>;
+  if (!status) return <span className="pill pill-neutral"><CircleDashed size={12} /> checking…</span>;
   if (status === 'online') return <span className="pill status-ready"><Database size={12} /> database online</span>;
   return <span className="pill status-locked"><Database size={12} /> database offline</span>;
 }
@@ -55,6 +54,7 @@ export default function AppShell() {
   const { data: health } = useApi(() => api.health(), []);
   const degraded = health && health.database === 'offline';
   const { user, loading: authLoading, logout } = useAuth();
+  const [sidebarOpen, setSidebarOpen] = useState(true);
 
   function initials(name) {
     return name
@@ -67,16 +67,23 @@ export default function AppShell() {
   }
 
   return (
-    <div className="app-shell">
+    <div className={`app-shell${sidebarOpen ? '' : ' sidebar-collapsed'}`}>
       <aside className="sidebar">
-        <div className="brand">
-          <div className="brand-mark">
-            <DatabaseZap size={18} />
+        <div className="sidebar-head">
+          <div className="brand">
+            <div className="brand-text">
+              <div className="brand-name">Pathfinder</div>
+              <div className="brand-sub">AI Learning Path Graph</div>
+            </div>
           </div>
-          <div>
-            <div className="brand-name">Pathfinder</div>
-            <div className="brand-sub">AI Learning Path Graph</div>
-          </div>
+          <button
+            className="sidebar-burger"
+            onClick={() => setSidebarOpen((o) => !o)}
+            title={sidebarOpen ? 'Hide menu' : 'Show menu'}
+            aria-label="Toggle navigation"
+          >
+            {sidebarOpen ? <X size={18} /> : <Menu size={18} />}
+          </button>
         </div>
 
         <div className="nav-section">Explore</div>
@@ -88,28 +95,44 @@ export default function AppShell() {
             className={({ isActive }) => `nav-item${isActive ? ' active' : ''}`}
           >
             <item.icon size={17} />
-            {item.label}
+            <span className="nav-label">{item.label}</span>
           </NavLink>
         ))}
 
-        <div className="sidebar-footer">
-          Built on a graph database — topics, prerequisites and skills modelled as nodes and
-          relationships.
+        <div className="sidebar-user">
+          {authLoading ? (
+            <span className="pill pill-sidebar">
+              <CircleDashed size={12} /> session…
+            </span>
+          ) : user ? (
+            <>
+              <div className="sidebar-user-info">
+                <span
+                  className="avatar avatar-sm"
+                  style={{ '--avatar-bg': user.avatarColor }}
+                >
+                  {initials(user.name)}
+                </span>
+                <div className="sidebar-user-text">
+                  <div className="sidebar-user-name">{user.name}</div>
+                  <div className="sidebar-user-sub">Learner</div>
+                </div>
+              </div>
+              <button className="sidebar-logout" title="Sign out" onClick={logout}>
+                <LogOut size={15} />
+              </button>
+            </>
+          ) : (
+            <Link to="/login" className="btn btn-sm btn-block">
+              <LogIn size={14} /> Sign in
+            </Link>
+          )}
         </div>
       </aside>
 
       <div className="main">
         {degraded && (
-          <div
-            style={{
-              background: '#fef3c7',
-              color: '#92400e',
-              padding: '10px 32px',
-              fontSize: 13.5,
-              fontWeight: 500,
-              borderBottom: '1px solid #fde68a',
-            }}
-          >
+          <div className="db-banner">
             The graph database is currently unreachable. Pages will show cached or empty data until
             it comes back online.
           </div>
@@ -118,24 +141,6 @@ export default function AppShell() {
           <span className="topbar-title">{titleFor(location.pathname)}</span>
           <div className="topbar-right">
             <DbPill status={health?.database} />
-            {authLoading ? (
-              <span className="pill" style={{ background: '#f1f5f9', color: '#64748b' }}>
-                <CircleDashed size={12} /> session…</span>
-            ) : user ? (
-              <div className="topbar-user">
-                <span className="avatar" style={{ width: 28, height: 28, fontSize: 12, background: user.avatarColor || '#6366f1' }}>
-                  {initials(user.name)}
-                </span>
-                <span className="topbar-user-name">{user.name}</span>
-                <button className="topbar-logout" title="Sign out" onClick={logout}>
-                  <LogOut size={14} />
-                </button>
-              </div>
-            ) : (
-              <Link to="/login" className="btn btn-sm">
-                <LogIn size={14} /> Sign in
-              </Link>
-            )}
           </div>
         </div>
         <div className="content">

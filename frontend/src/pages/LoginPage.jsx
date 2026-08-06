@@ -1,12 +1,10 @@
 import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { LogIn, Loader2, Lock, Mail } from 'lucide-react';
+import { LogIn, Loader2, Lock, Mail, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../context/AuthContext.jsx';
 
 const DEMO_ACCOUNTS = [
-  { email: 'amelia@example.com', name: 'Amelia Chen', note: 'Frontend · 3 topics done' },
-  { email: 'bima@example.com', name: 'Bima Putra', note: 'Data science · 3 topics done' },
-  { email: 'ciara@example.com', name: "Ciara O'Brien", note: 'Backend · 4 topics done' },
+  { email: 'dhiyafasya05@gmail.com', name: 'Dhiya Fasya', note: 'Full-stack · 3 topics done' },
 ];
 
 export default function LoginPage() {
@@ -17,6 +15,7 @@ export default function LoginPage() {
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
 
@@ -41,12 +40,12 @@ export default function LoginPage() {
   return (
     <div className="auth-page">
       <div className="card card-pad auth-card">
-        <h1 className="section-title" style={{ fontSize: 20 }}>Sign in to Pathfinder</h1>
-        <p className="muted" style={{ fontSize: 14, marginTop: 4 }}>
+        <h1 className="section-title auth-title">Sign in to Pathfinder</h1>
+        <p className="muted auth-sub">
           Sign in to personalise your learning paths and save your progress to the graph.
         </p>
 
-        <form onSubmit={handleSubmit} className="mt-4" style={{ display: 'grid', gap: 14 }}>
+        <form onSubmit={handleSubmit} className="auth-form">
           <div className="field">
             <label className="field-label" htmlFor="email">Email</label>
             <div className="auth-input">
@@ -69,13 +68,22 @@ export default function LoginPage() {
               <Lock size={15} />
               <input
                 id="password"
-                type="password"
+                type={showPassword ? 'text' : 'password'}
                 className="input auth-input-inner"
                 placeholder="••••••••"
                 value={password}
                 autoComplete="current-password"
                 onChange={(e) => setPassword(e.target.value)}
               />
+              <button
+                type="button"
+                className="auth-input-toggle"
+                onClick={() => setShowPassword((s) => !s)}
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
+                tabIndex={-1}
+              >
+                {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
+              </button>
             </div>
           </div>
 
@@ -85,7 +93,7 @@ export default function LoginPage() {
             </div>
           )}
 
-          <button className="btn btn-primary btn-block" disabled={submitting} type="submit">
+          <button className="btn btn-primary btn-block btn-green" disabled={submitting} type="submit">
             {submitting ? <Loader2 size={15} className="spin" /> : <LogIn size={15} />}
             {submitting ? 'Signing in…' : 'Sign in'}
           </button>
@@ -97,7 +105,7 @@ export default function LoginPage() {
 
         <div className="divider" />
 
-        <div className="eyebrow" style={{ marginBottom: 8 }}>Demo accounts</div>
+        <div className="eyebrow auth-demo-label">Demo account</div>
         <div className="demo-accounts">
           {DEMO_ACCOUNTS.map((d) => (
             <button
@@ -106,7 +114,7 @@ export default function LoginPage() {
               className="demo-account"
               onClick={() => {
                 setEmail(d.email);
-                setPassword('password123');
+                setPassword('Dhiya123#');
               }}
             >
               <span className="demo-account-main">
@@ -114,7 +122,7 @@ export default function LoginPage() {
                 <span className="demo-account-note">{d.note}</span>
               </span>
               <span className="demo-account-email">{d.email}</span>
-              <span className="pill status-ready">password123</span>
+              <span className="pill status-ready">Dhiya123#</span>
             </button>
           ))}
         </div>

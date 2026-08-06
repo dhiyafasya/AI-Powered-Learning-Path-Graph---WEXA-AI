@@ -1,0 +1,65 @@
+/* Responsive */
+@media (max-width: 880px) {
+  .app-shell,
+  .app-shell.sidebar-collapsed {
+    grid-template-columns: 1fr;
+  }
+  .sidebar {
+    position: static;
+    height: auto;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .app-shell.sidebar-collapsed .sidebar .nav-section,
+  .app-shell.sidebar-collapsed .sidebar .nav-item,
+  .app-shell.sidebar-collapsed .sidebar .sidebar-user {
+    display: none;
+  }
+  .nav-section {
+    display: none;
+  }
+  .content {
+    padding: 20px 16px 48px;
+  }
+  .topbar {
+    padding: 12px 16px;
+  }
+  .hero {
+    padding: 26px 22px;
+  }
+}
+
+/* Collapsed sidebar (desktop): slim icon rail driven by the in-sidebar burger */
+@media (min-width: 881px) {
+  .app-shell.sidebar-collapsed .sidebar {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+  .app-shell.sidebar-collapsed .sidebar-head {
+    justify-content: center;
+    padding-left: 0;
+    padding-right: 0;
+  }
+  .app-shell.sidebar-collapsed .brand-text,
+  .app-shell.sidebar-collapsed .nav-section {
+    display: none;
+  }
+  .app-shell.sidebar-collapsed .nav-item {
+    justify-content: center;
+    padding-left: 0;
+    padding-right: 0;
+  }
+  .app-shell.sidebar-collapsed .nav-label {
+    display: none;
+  }
+  .app-shell.sidebar-collapsed .sidebar-user {
+    justify-content: center;
+    padding-left: 0;
+    padding-right: 0;
+  }
+  .app-shell.sidebar-collapsed .sidebar-user-text,
+  .app-shell.sidebar-collapsed .sidebar-logout {
+    display: none;
+  }
+}

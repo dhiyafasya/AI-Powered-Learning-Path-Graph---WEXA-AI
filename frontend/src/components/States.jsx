@@ -16,8 +16,8 @@ export function ErrorState({ message, onRetry, compact = false }) {
         <AlertTriangle size={22} />
       </div>
       <div>
-        <div style={{ fontWeight: 600, color: 'var(--ink-soft)' }}>Something went wrong</div>
-        <div style={{ marginTop: 4, maxWidth: 420 }}>{message}</div>
+        <div className="state-title">Something went wrong</div>
+        <div className="state-msg">{message}</div>
       </div>
       {onRetry && (
         <button className="btn btn-primary btn-sm" onClick={onRetry}>
@@ -35,9 +35,9 @@ export function EmptyState({ icon: Icon = Inbox, title, message, action }) {
         <Icon size={22} />
       </div>
       <div>
-        <div style={{ fontWeight: 600, color: 'var(--ink-soft)' }}>{title}</div>
+        <div className="state-title">{title}</div>
         {message && (
-          <div style={{ marginTop: 4, maxWidth: 420, lineHeight: 1.5 }}>{message}</div>
+          <div className="state-msg-wide">{message}</div>
         )}
       </div>
       {action}

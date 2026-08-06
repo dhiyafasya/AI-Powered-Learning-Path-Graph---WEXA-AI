@@ -1,0 +1,150 @@
+/* ---------- Authentication ---------- */
+
+.auth-page {
+  max-width: 440px;
+  margin: 0 auto;
+}
+
+.auth-card {
+  border-color: #bfdbfe;
+  box-shadow: 0 10px 40px rgba(15, 23, 42, 0.08);
+}
+
+.auth-input {
+  position: relative;
+  display: flex;
+  align-items: center;
+  color: var(--muted);
+}
+
+.auth-input svg {
+  position: absolute;
+  left: 13px;
+  pointer-events: none;
+}
+
+.auth-input-inner {
+  padding-left: 38px;
+  padding-right: 38px;
+}
+
+.auth-input-toggle {
+  position: absolute;
+  right: 8px;
+  background: none;
+  border: none;
+  color: var(--muted);
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  transition: color 0.15s ease, background 0.15s ease;
+}
+
+.auth-input-toggle:hover {
+  color: var(--ink);
+  background: var(--surface-2);
+}
+
+.auth-error {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #b91c1c;
+  border-radius: var(--radius-sm);
+  padding: 9px 12px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.auth-gate {
+  text-align: center;
+  border-color: #bfdbfe;
+  background: linear-gradient(135deg, #f0f9ff, #eff6ff);
+}
+
+.auth-gate-icon {
+  width: 48px;
+  height: 48px;
+  margin: 0 auto 12px;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  color: var(--accent);
+  background: #dbeafe;
+}
+
+.auth-gate-actions {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 20px;
+  flex-wrap: wrap;
+}
+
+.auth-switch {
+  margin-top: 16px;
+  text-align: center;
+  font-size: 13.5px;
+  color: var(--muted);
+}
+
+.auth-switch a {
+  color: var(--accent-ink);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.auth-switch a:hover {
+  text-decoration: underline;
+}
+
+/* ---------- Demo accounts ---------- */
+
+.demo-accounts {
+  display: grid;
+  gap: 8px;
+}
+
+.demo-account {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  text-align: left;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  cursor: pointer;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.demo-account:hover {
+  border-color: #93c5fd;
+  box-shadow: 0 0 0 3px rgba(15, 23, 42, 0.1);
+}
+
+.demo-account-main {
+  display: grid;
+  min-width: 0;
+}
+
+.demo-account-name {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.demo-account-note {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.demo-account-email {
+  margin-left: auto;
+  font-size: 12px;
+  color: var(--muted);
+  font-family: var(--font-mono, ui-monospace, monospace);
+  white-space: nowrap;
+}

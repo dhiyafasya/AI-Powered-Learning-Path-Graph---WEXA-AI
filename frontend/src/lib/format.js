@@ -1,7 +1,7 @@
 export const LEVEL_COLORS = {
   beginner: '#10b981',
   intermediate: '#0ea5e9',
-  advanced: '#8b5cf6',
+  advanced: '#0f172a',
 };
 
 export function levelColor(level) {
@@ -24,7 +24,26 @@ export function initials(name = '') {
 }
 
 export const CATEGORY_COLORS = {
-  'Web Development': '#6366f1',
-  'Data Science & ML': '#0ea5e9',
-  'Backend Engineering': '#f59e0b',
+  'Web Development': '#052F4A',
+  'Data Science & ML': '#4D0218',
+  'Backend Engineering': '#0284c7',
 };
+
+export const CATEGORY_TINTS = {
+  'Web Development': '#e6eef4',
+  'Data Science & ML': '#f9e8ec',
+  'Backend Engineering': '#e0f2fe',
+};
+
+export function pathTone(icon) {
+  if (icon === 'code') return 'web';
+  if (icon === 'chart-line') return 'data';
+  return 'backend';
+}
+
+export function categoryTone(category) {
+  if (category === 'Web Development') return 'web';
+  if (category === 'Data Science & ML') return 'data';
+  if (category === 'Backend Engineering') return 'backend';
+  return '';
+}

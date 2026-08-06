@@ -2,7 +2,6 @@ import { useMemo } from 'react';
 import { ReactFlow, Background, Controls, MiniMap, Handle, Position, MarkerType } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { layeredPositions } from '../lib/layout.js';
-import { levelColor } from '../lib/format.js';
 
 function TopicNode({ data, selected }) {
   const t = data.topic;
@@ -13,9 +12,9 @@ function TopicNode({ data, selected }) {
 
   return (
     <div className={classes.join(' ')}>
-      <Handle type="source" position={Position.Left} style={{ background: '#cbd5e1' }} />
+      <Handle type="source" position={Position.Left} className="rf-handle" />
       <div className="rf-node-top">
-        <span className="dot" style={{ background: levelColor(t.level) }} />
+        <span className={`dot dot-${t.level}`} />
         <span className="rf-node-title">{t.name}</span>
       </div>
       <div className="rf-node-meta">
@@ -25,7 +24,7 @@ function TopicNode({ data, selected }) {
           <span className="rf-unlock">· unlocks {data.unlockScore}</span>
         )}
       </div>
-      <Handle type="target" position={Position.Right} style={{ background: '#cbd5e1' }} />
+      <Handle type="target" position={Position.Right} className="rf-handle" />
     </div>
   );
 }
@@ -64,7 +63,6 @@ export default function GraphCanvas({
       id: `e-${i}-${e.source}-${e.target}`,
       source: e.source,
       target: e.target,
-      style: { stroke: '#94a3b8', strokeWidth: 1.5 },
       markerEnd: { type: MarkerType.ArrowClosed, color: '#94a3b8' },
     }));
 
@@ -87,7 +85,7 @@ export default function GraphCanvas({
       >
         <Background gap={18} color="#e2e8f0" />
         <Controls showInteractive={false} />
-        <MiniMap pannable zoomable nodeColor="#c7c9f5" maskColor="rgba(244,245,250,0.7)" />
+        <MiniMap pannable zoomable nodeColor="#94a3b8" maskColor="rgba(244,245,250,0.7)" />
       </ReactFlow>
     </div>
   );

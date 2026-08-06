@@ -1,0 +1,468 @@
+/* ---------- Shared component variants ---------- */
+
+.pill-neutral {
+  background: #f1f5f9;
+  color: #334155;
+}
+
+.pill-sidebar {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--faint);
+}
+
+.pill-goal {
+  margin-left: 8px;
+}
+
+.pill-weight {
+  font-weight: 600;
+}
+
+.btn-green {
+  background: #2aa63e;
+}
+
+.btn-green:hover {
+  background: #2aa63e;
+  filter: brightness(1.05);
+}
+
+.icon-accent {
+  color: var(--accent);
+}
+
+.accent-text {
+  color: var(--accent-ink);
+}
+
+.eyebrow-accent {
+  color: var(--accent-ink);
+  margin-top: 4px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.eyebrow-accent-sm {
+  color: var(--accent-ink);
+  margin-bottom: 6px;
+}
+
+.card-error {
+  border-color: #fecaca;
+  background: #fef2f2;
+}
+
+.card-recommend {
+  border-color: #bfdbfe;
+  background: linear-gradient(135deg, #f0f9ff, #eff6ff);
+}
+
+.min-w-0 {
+  min-width: 0;
+}
+
+.text-sm {
+  font-size: 14px;
+}
+
+.section-title-flush {
+  margin-bottom: 0;
+}
+
+.section-title-flex {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.section-title-md {
+  font-size: 18px;
+}
+
+/* ---------- Stat icon tones ---------- */
+
+.stat-icon-warm { background: #ffedd5; color: #ea7a17; }
+.stat-icon-sky { background: #dbeafe; color: #0f172a; }
+.stat-icon-green { background: #f0fdf4; color: #059669; }
+.stat-icon-orange { background: #fff7ed; color: #c2410c; }
+.stat-icon-blue { background: #eff6ff; color: #0284c7; }
+
+/* ---------- Path card tones (web / data / backend) ---------- */
+
+.path-tile-web { background: #e6eef4; color: #052f4a; }
+.path-tile-data { background: #f9e8ec; color: #4d0218; }
+.path-tile-backend { background: #e0f2fe; color: #0284c7; }
+
+.path-pill-web { background: #e6eef4; color: #052f4a; font-weight: 600; }
+.path-pill-data { background: #f9e8ec; color: #4d0218; font-weight: 600; }
+.path-pill-backend { background: #e0f2fe; color: #0284c7; font-weight: 600; }
+
+.path-card-pill {
+  margin-top: 14px;
+}
+
+/* ---------- Category chip tones ---------- */
+
+.category-chip-web { background: #e6eef4; color: #052f4a; }
+.category-chip-data { background: #f9e8ec; color: #4d0218; }
+.category-chip-backend { background: #e0f2fe; color: #0284c7; }
+
+.cat-dot-web { background: #052f4a; }
+.cat-dot-data { background: #4d0218; }
+.cat-dot-backend { background: #0284c7; }
+.cat-dot-muted { background: #94a3b8; }
+
+/* ---------- Avatars ---------- */
+
+.avatar {
+  background: var(--avatar-bg, #0f172a);
+}
+
+.avatar-xs {
+  width: 26px;
+  height: 26px;
+  font-size: 11px;
+}
+
+.avatar-sm {
+  width: 32px;
+  height: 32px;
+  font-size: 12px;
+}
+
+/* ---------- Graph ---------- */
+
+.rf-handle {
+  background: #cbd5e1;
+}
+
+.react-flow__edge-path {
+  stroke: #94a3b8;
+  stroke-width: 1.5;
+}
+
+/* ---------- State pages ---------- */
+
+.state-page {
+  min-height: 60vh;
+}
+
+.state-title {
+  font-weight: 600;
+  color: var(--ink-soft);
+}
+
+.state-title-lg {
+  font-weight: 800;
+  font-size: 22px;
+  color: var(--ink);
+}
+
+.state-msg {
+  margin-top: 4px;
+}
+
+.state-msg-wide {
+  margin-top: 4px;
+  max-width: 420px;
+  line-height: 1.5;
+}
+
+/* ---------- Demand bars (skills) ---------- */
+
+.demand-bar {
+  flex: 1;
+  min-width: 120px;
+}
+
+.demand-track {
+  height: 8px;
+  background: #eef1f8;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.demand-fill {
+  height: 100%;
+  background: #fe9a37;
+  border-radius: 999px;
+}
+
+.skills-head {
+  display: flex;
+  font-weight: 600;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+}
+
+.taught-col {
+  width: 120px;
+  text-align: right;
+  font-size: 14px;
+}
+
+.demand-col {
+  width: 130px;
+  text-align: right;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.demand-sub {
+  font-size: 12px;
+  font-weight: 500;
+}
+
+/* ---------- Search boxes ---------- */
+
+.search-box {
+  position: relative;
+  flex: 1 1 260px;
+}
+
+.search-box-wide {
+  flex: 1 1 280px;
+}
+
+.search-box svg {
+  position: absolute;
+  left: 12px;
+  top: 12px;
+  color: var(--faint);
+  pointer-events: none;
+}
+
+.input-search {
+  padding-left: 36px;
+}
+
+.select-category {
+  width: 230px;
+}
+
+.filter-row {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.filter-row-lg {
+  margin-bottom: 22px;
+}
+
+/* ---------- Back links / notes ---------- */
+
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 14px;
+  margin-bottom: 16px;
+}
+
+.page-note {
+  color: var(--muted);
+  margin-bottom: 12px;
+  font-size: 14px;
+}
+
+.hero-compact {
+  padding: 26px 28px;
+}
+
+.hero-tags {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+
+/* ---------- Grids ---------- */
+
+.card-grid-240 {
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+
+.card-grid-280 {
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+
+/* ---------- Auth ---------- */
+
+.auth-title {
+  font-size: 20px;
+}
+
+.auth-sub {
+  font-size: 14px;
+  margin-top: 4px;
+}
+
+.auth-form {
+  margin-top: 16px;
+  display: grid;
+  gap: 14px;
+}
+
+.auth-demo-label {
+  margin-bottom: 8px;
+}
+
+/* ---------- Auth gate ---------- */
+
+.gate-sub {
+  font-size: 14px;
+  margin-top: 6px;
+  max-width: 420px;
+  margin-inline: auto;
+}
+
+.gate-note {
+  margin-top: 12px;
+}
+
+/* ---------- Topic cards ---------- */
+
+.topic-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.topic-card-title {
+  font-weight: 700;
+  font-size: 15.5px;
+  margin-bottom: 6px;
+}
+
+.topic-card-summary {
+  color: var(--muted);
+  font-size: 13.5px;
+  line-height: 1.5;
+  min-height: 38px;
+}
+
+.topic-card-footer {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 16px;
+  color: var(--muted);
+  font-size: 12.5px;
+}
+
+.goals-list {
+  margin: 0;
+  padding-left: 18px;
+  color: var(--ink-soft);
+  font-size: 14px;
+  line-height: 1.9;
+}
+
+/* ---------- Generator ---------- */
+
+.learner-note {
+  color: var(--accent-ink);
+  margin-top: 4px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.field-end {
+  justify-content: flex-end;
+}
+
+.recommend-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.recommend-item {
+  flex: 1 1 220px;
+}
+
+.recommend-item-first {
+  border-color: #93c5fd;
+}
+
+.suggestion-name {
+  font-weight: 700;
+  font-size: 15px;
+}
+
+.suggestion-summary {
+  color: var(--muted);
+  font-size: 13px;
+  margin-top: 4px;
+}
+
+.row-rounded {
+  border-radius: 8px;
+}
+
+.row-title-done {
+  color: var(--muted);
+}
+
+/* ---------- Explorer legend ---------- */
+
+.legend {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--ink-soft);
+}
+
+.dot-beginner { background: #10b981; }
+.dot-intermediate { background: #0ea5e9; }
+.dot-advanced { background: #0f172a; }
+.dot-requires {
+  width: 26px;
+  height: 0;
+  border-top: 2px solid #94a3b8;
+}
+
+/* ---------- Database banner ---------- */
+
+.db-banner {
+  background: #fef3c7;
+  color: #92400e;
+  padding: 10px 32px;
+  font-size: 13.5px;
+  font-weight: 500;
+  border-bottom: 1px solid #fde68a;
+}
+
+/* ---------- Database offline card ---------- */
+
+.db-offline-icon {
+  margin: 0 auto 14px;
+}
+
+.db-offline-title {
+  font-size: 20px;
+}
+
+.db-offline-sub {
+  margin: 10px auto 20px;
+  text-align: center;
+}

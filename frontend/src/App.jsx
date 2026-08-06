@@ -14,7 +14,6 @@ const TopicPage = lazy(() => import('./pages/TopicPage.jsx'));
 const GeneratorPage = lazy(() => import('./pages/GeneratorPage.jsx'));
 const ExplorerPage = lazy(() => import('./pages/ExplorerPage.jsx'));
 const SkillsPage = lazy(() => import('./pages/SkillsPage.jsx'));
-const LearnersPage = lazy(() => import('./pages/LearnersPage.jsx'));
 const LoginPage = lazy(() => import('./pages/LoginPage.jsx'));
 const RegisterPage = lazy(() => import('./pages/RegisterPage.jsx'));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage.jsx'));
@@ -23,11 +22,11 @@ function DatabaseOffline({ onRetry }) {
   return (
     <div className="db-offline">
       <div className="card db-offline-card">
-        <div className="state-icon" style={{ margin: '0 auto 14px' }}>
+        <div className="state-icon db-offline-icon">
           <DatabaseZap size={26} />
         </div>
-        <h2 className="section-title" style={{ fontSize: 20 }}>Database is offline</h2>
-        <p className="page-sub" style={{ margin: '10px auto 20px', textAlign: 'center' }}>
+        <h2 className="section-title db-offline-title">Database is offline</h2>
+        <p className="page-sub db-offline-sub">
           Pathfinder couldn't reach its graph database. Make sure your CognoDB instance is running
           and the backend has the right credentials.
         </p>
@@ -91,7 +90,6 @@ export default function App() {
             <Route path="generate" element={<GeneratorPage />} />
             <Route path="explore" element={<ExplorerPage />} />
             <Route path="skills" element={<SkillsPage />} />
-            <Route path="learners" element={<LearnersPage />} />
             <Route path="login" element={<LoginPage />} />
             <Route path="register" element={<RegisterPage />} />
             <Route path="*" element={<NotFoundPage />} />

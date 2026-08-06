@@ -4,13 +4,14 @@ import { useApi } from '../hooks/useApi.js';
 import { api } from '../api/client.js';
 import { Loading, ErrorState } from '../components/States.jsx';
 import PathIcon from '../components/PathIcon.jsx';
+import { pathTone } from '../lib/format.js';
 
 function statCards(stats, paths, skills) {
   return [
-    { icon: BookOpen, tint: '#eef2ff', color: '#4f46e5', value: stats?.nodeCount ?? '—', label: 'Knowledge nodes' },
-    { icon: GitFork, tint: '#f0fdf4', color: '#059669', value: stats?.relationshipCount ?? '—', label: 'Relationships' },
-    { icon: Route, tint: '#eff6ff', color: '#0284c7', value: paths?.length ?? '—', label: 'Learning paths' },
-    { icon: Layers, tint: '#fdf4ff', color: '#a21caf', value: skills?.length ?? '—', label: 'Skills' },
+    { icon: BookOpen, value: stats?.nodeCount ?? '—', label: 'Knowledge nodes' },
+    { icon: GitFork, value: stats?.relationshipCount ?? '—', label: 'Relationships' },
+    { icon: Route, value: paths?.length ?? '—', label: 'Learning paths' },
+    { icon: Layers, value: skills?.length ?? '—', label: 'Skills' },
   ];
 }
 
@@ -44,12 +45,12 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="stat-grid" style={{ marginBottom: 28 }}>
+      <section className="stat-grid">
         {cards.map((c) => {
           const Icon = c.icon;
           return (
             <div className="stat-card" key={c.label}>
-              <div className="stat-icon" style={{ background: c.tint, color: c.color }}>
+              <div className="stat-icon stat-icon-warm">
                 <Icon size={20} />
               </div>
               <div>
@@ -62,32 +63,32 @@ export default function HomePage() {
       </section>
 
       <div className="flex items-center justify-between mb-4">
-        <h2 className="section-title" style={{ marginBottom: 0 }}>Learning paths</h2>
+        <h2 className="section-title section-title-flush">Learning paths</h2>
         <Link to="/paths" className="btn btn-sm">View all</Link>
       </div>
 
       <section className="card-grid">
-        {paths?.map((p) => (
-          <Link to={`/paths/${p.id}`} key={p.id} className="card card-pad card-hover">
-            <div className="flex items-center gap-3" style={{ marginBottom: 12 }}>
-              <div
-                className="stat-icon"
-                style={{ background: 'linear-gradient(135deg, #eef2ff, #fdf4ff)', color: '#6d28d9' }}
-              >
-                <PathIcon icon={p.icon} />
-              </div>
-                <div>
-                  <div style={{ fontWeight: 700, fontSize: 16 }}>{p.name}</div>
-                  <div className="muted" style={{ fontSize: 13 }}>{p.tagline}</div>
+        {paths?.map((p) => {
+          const tone = pathTone(p.icon);
+          return (
+            <Link to={`/paths/${p.id}`} key={p.id} className="card card-pad card-hover path-card">
+              <div className="path-card-head">
+                <div className={`stat-icon path-tile-${tone}`}>
+                  <PathIcon icon={p.icon} />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="path-card-title">{p.name}</div>
+                  <div className="path-card-sub">{p.tagline}</div>
                 </div>
               </div>
-              <div className="flex items-center gap-2">
-                <span className="pill status-done">
+              <div className="flex items-center gap-2 path-card-pill">
+                <span className={`pill path-pill-${tone}`}>
                   <BookOpen size={12} /> {p.topicCount} topics
                 </span>
               </div>
             </Link>
-        ))}
+          );
+        })}
       </section>
     </div>
   );

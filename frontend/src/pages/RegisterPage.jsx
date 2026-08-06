@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Loader2, Mail, Lock, User, UserPlus } from 'lucide-react';
+import { Loader2, Mail, Lock, User, UserPlus, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../context/AuthContext.jsx';
 
 export default function RegisterPage() {
@@ -13,6 +13,8 @@ export default function RegisterPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
   const [error, setError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
 
@@ -52,13 +54,13 @@ export default function RegisterPage() {
   return (
     <div className="auth-page">
       <div className="card card-pad auth-card">
-        <h1 className="section-title" style={{ fontSize: 20 }}>Create your account</h1>
-        <p className="muted" style={{ fontSize: 14, marginTop: 4 }}>
+        <h1 className="section-title auth-title">Create your account</h1>
+        <p className="muted auth-sub">
           Your new learner node lands in the graph, ready to save progress and generate personalised
           paths.
         </p>
 
-        <form onSubmit={handleSubmit} className="mt-4" style={{ display: 'grid', gap: 14 }}>
+        <form onSubmit={handleSubmit} className="auth-form">
           <div className="field">
             <label className="field-label" htmlFor="name">Name</label>
             <div className="auth-input">
@@ -96,13 +98,22 @@ export default function RegisterPage() {
               <Lock size={15} />
               <input
                 id="password"
-                type="password"
+                type={showPassword ? 'text' : 'password'}
                 className="input auth-input-inner"
                 placeholder="At least 8 characters"
                 value={password}
                 autoComplete="new-password"
                 onChange={(e) => setPassword(e.target.value)}
               />
+              <button
+                type="button"
+                className="auth-input-toggle"
+                onClick={() => setShowPassword((s) => !s)}
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
+                tabIndex={-1}
+              >
+                {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
+              </button>
             </div>
           </div>
 
@@ -112,13 +123,22 @@ export default function RegisterPage() {
               <Lock size={15} />
               <input
                 id="confirm"
-                type="password"
+                type={showConfirm ? 'text' : 'password'}
                 className="input auth-input-inner"
                 placeholder="Repeat your password"
                 value={confirm}
                 autoComplete="new-password"
                 onChange={(e) => setConfirm(e.target.value)}
               />
+              <button
+                type="button"
+                className="auth-input-toggle"
+                onClick={() => setShowConfirm((s) => !s)}
+                aria-label={showConfirm ? 'Hide password' : 'Show password'}
+                tabIndex={-1}
+              >
+                {showConfirm ? <EyeOff size={15} /> : <Eye size={15} />}
+              </button>
             </div>
           </div>
 
@@ -128,7 +148,7 @@ export default function RegisterPage() {
             </div>
           )}
 
-          <button className="btn btn-primary btn-block" disabled={submitting} type="submit">
+          <button className="btn btn-primary btn-block btn-green" disabled={submitting} type="submit">
             {submitting ? <Loader2 size={15} className="spin" /> : <UserPlus size={15} />}
             {submitting ? 'Creating account…' : 'Create account'}
           </button>

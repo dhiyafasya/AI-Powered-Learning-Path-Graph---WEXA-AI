@@ -168,9 +168,9 @@ The API projects them back to a plain `id` so consumers always see `{ id, … }`
 | `CONTAINS` | `order` (position within the path) |
 | `COMPLETED` | `score`, `completedAt` |
 
-The dataset ships with **37 topics, ~59 `REQUIRES` edges, 18 skills, 3 paths and 4 learners** — well
-inside the free c0 tier, but rich enough to exercise deep prerequisite chains (e.g. *Deep Learning*
-pulls in 9 prerequisites across 4 hops).
+The dataset ships with **37 topics, 64 `REQUIRES` edges, 18 skills, 3 paths and 1 demo learner** —
+well inside the free c0 tier, but rich enough to exercise deep prerequisite chains (e.g. *Deep
+Learning* pulls in 9 prerequisites across 4 hops).
 
 ---
 
@@ -273,25 +273,29 @@ and next-step suggestions.
 │   │   ├── db/driver.js          # Neo4j/CognoDB driver, health ping
 │   │   ├── queries/cypher.js     # all parameterised Cypher statements
 │   │   ├── lib/record.js         # driver record → plain JSON
-│   │   ├── middleware/errorHandler.js
-│   │   ├── routes/               # health, catalog, graph, paths, users
-│   │   └── services/             # catalog, user, path service + pathEngine
+│   │   ├── middleware/           # auth, errorHandler
+│   │   ├── routes/               # health, catalog, graph, paths, users, auth
+│   │   └── services/             # catalog, user, path, auth service + pathEngine
 │   ├── scripts/
 │   │   ├── seed.js               # idempotent data loader (--reset option)
 │   │   └── seedData.js           # the dataset
-│   ├── test/pathEngine.test.js   # 7 unit tests for the recommender
+│   ├── test/                     # pathEngine + auth unit tests (node --test)
 │   ├── .env.example
 │   └── package.json
 └── frontend/
+    ├── public/                   # index.html entry
     ├── src/
     │   ├── App.jsx               # routing + DB-health gate
     │   ├── api/client.js         # typed API wrapper
+    │   ├── context/AuthContext.jsx
     │   ├── hooks/useApi.js       # loading/error/data hook
     │   ├── components/           # AppShell, GraphCanvas, States, PathIcon
+    │   ├── assets/css/           # variables, base, layout, components, auth,
+    │   │                         # responsive, utilities (no inline styles)
     │   ├── lib/                  # layered graph layout, formatting
-    │   ├── pages/                # 9 pages
-    │   └── styles/global.css
+    │   └── pages/                # 11 pages
     ├── index.html
+    ├── netlify.toml              # Netlify build + SPA redirects
     ├── vite.config.js            # dev proxy /api → :4000
     └── package.json
 ```
@@ -368,14 +372,15 @@ instance paused, env missing), the API returns clean `503` JSON and the UI shows
 
 - **37 topics** across *Web Development*, *Data Science & ML* and *Backend Engineering*, each with
   level, estimated hours and learning goals.
-- **59 `REQUIRES`** prerequisite edges, including deep chains and cross-domain shared topics
+- **64 `REQUIRES`** prerequisite edges, including deep chains and cross-domain shared topics
   (*Git*, *SQL*, *Node.js*, *Python* appear in multiple paths).
 - **18 skills** with `TEACHES` relationships.
 - **3 learning paths** (Web Developer, Data Scientist, Backend Engineer) with ordered `CONTAINS`
   relationships.
-- **4 learners** with realistic `COMPLETED` progress to power the personalised generator. Each seed
-  learner is also an **account** you can sign in with (email + password are hashed with bcrypt and
-  stored as `passwordHash` on the `User` node — plaintext is never persisted).
+- **1 demo learner** (Dhiya Fasya) with realistic `COMPLETED` progress to power the personalised
+  generator. The seed learner is also an **account** you can sign in with (email + password are
+  hashed with bcrypt and stored as `passwordHash` on the `User` node — plaintext is never
+  persisted).
 
 ---
 
@@ -394,18 +399,17 @@ lets you save progress back to the graph (`COMPLETED` edges on your own `User` n
 
 Tokens are sent via `Authorization: Bearer` and kept in `localStorage` by the frontend.
 
-### Demo accounts
+### Demo account
 
-Every seed learner can sign in with password `password123`:
+The seed learner can sign in with:
 
 | Email | Learner | Progress |
 | --- | --- | --- |
-| `amelia@example.com` | Amelia Chen | Frontend · 3 topics done |
-| `bima@example.com` | Bima Putra | Data science · 3 topics done |
-| `ciara@example.com` | Ciara O'Brien | Backend · 4 topics done |
-| `guest@example.com` | Guest Learner | none |
+| `dhiyafasya05@gmail.com` | Dhiya Fasya | Full-stack · 3 topics done |
 
-The login page includes one-click buttons that pre-fill these credentials. If
+Password: `Dhiya123#`
+
+The login page includes a one-click button that pre-fills these credentials. If
 `JWT_SECRET` is missing, auth endpoints respond `503 AUTH_NOT_CONFIGURED` instead of
 crashing.
 
@@ -438,7 +442,7 @@ Try the core one:
 ```bash
 curl -X POST http://localhost:4000/api/paths/generate \
   -H "Content-Type: application/json" \
-  -d '{"targetId":"ds-dl","userId":"user-bima"}'
+  -d '{"targetId":"ds-dl","userId":"user-dhiya"}'
 ```
 
 ---
@@ -465,6 +469,21 @@ The backend and frontend build independently and can be hosted on any free tier:
 - **Frontend** — Vercel / Netlify. Build with `npm run build` (static files in `dist/`), set
   `VITE_API_BASE` to the hosted backend URL, and configure a rewrite so `/api/*` forwards to the
   backend (or point `VITE_API_BASE` at the backend directly).
+
+### Netlify
+
+The repo ships a ready-to-deploy `frontend/netlify.toml` (build command `npm run build`, publish
+`dist/`, SPA redirect `/*` → `/index.html`). To deploy from the CLI:
+
+```bash
+cd frontend
+npm install
+npx netlify login
+npm run deploy     # builds + `netlify deploy --prod --dir=dist`
+```
+
+Set `VITE_API_BASE` to your hosted backend URL (e.g. `https://your-backend.onrender.com`) during the
+build for the deployed app to talk to the graph API.
 
 > Live demo link & screen recording: added to this README before submission.
 

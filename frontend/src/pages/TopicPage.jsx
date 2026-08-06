@@ -5,19 +5,14 @@ import { useApi } from '../hooks/useApi.js';
 import { api } from '../api/client.js';
 import { Loading, ErrorState, EmptyState } from '../components/States.jsx';
 import GraphCanvas from '../components/GraphCanvas.jsx';
-import { formatHours } from '../lib/format.js';
+import { formatHours, categoryTone } from '../lib/format.js';
 
 function NeighbourList({ items, emptyLabel }) {
-  if (!items?.length) return <div className="muted" style={{ fontSize: 14 }}>{emptyLabel}</div>;
+  if (!items?.length) return <div className="muted text-sm">{emptyLabel}</div>;
   return (
     <div className="flex wrap gap-2">
       {items.map((n) => (
-        <Link
-          key={n.id}
-          to={`/topics/${n.id}`}
-          className="pill"
-          style={{ background: '#f1f5f9', color: '#334155', fontWeight: 600 }}
-        >
+        <Link key={n.id} to={`/topics/${n.id}`} className="pill pill-neutral pill-weight">
           {n.name}
         </Link>
       ))}
@@ -50,18 +45,19 @@ export default function TopicPage() {
   }
 
   const t = detail.topic;
+  const tone = categoryTone(t.category);
 
   return (
     <div>
-      <Link to="/topics" className="flex items-center gap-2 muted" style={{ fontSize: 14, marginBottom: 16 }}>
+      <Link to="/topics" className="back-link">
         <ArrowLeft size={15} /> All topics
       </Link>
 
-      <div className="hero" style={{ padding: '26px 28px' }}>
-        <div className="flex items-center gap-2 wrap" style={{ marginBottom: 10 }}>
-          <span className="category-chip">{t.category}</span>
+      <div className="hero hero-compact">
+        <div className="hero-tags">
+          <span className={`category-chip ${tone ? `category-chip-${tone}` : ''}`}>{t.category}</span>
           <span className={`pill pill-${t.level}`}>{t.level}</span>
-          <span className="pill" style={{ background: '#f1f5f9', color: '#334155' }}>
+          <span className="pill pill-neutral">
             <Clock size={12} /> {formatHours(t.estHours)}
           </span>
         </div>
@@ -74,21 +70,21 @@ export default function TopicPage() {
         </div>
       </div>
 
-      <div className="card-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', marginTop: 22 }}>
+      <div className="card-grid card-grid-280 mt-6">
         <div className="card card-pad">
-          <h3 className="section-title" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <h3 className="section-title section-title-flex">
             <GitForkIcon /> Prerequisites
           </h3>
           <NeighbourList items={detail.prerequisites} emptyLabel="No prerequisites — you can start here." />
         </div>
         <div className="card card-pad">
-          <h3 className="section-title" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <h3 className="section-title section-title-flex">
             <Target size={16} /> Unlocks
           </h3>
           <NeighbourList items={detail.unlocks} emptyLabel="Nothing depends on this topic yet." />
         </div>
         <div className="card card-pad">
-          <h3 className="section-title" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <h3 className="section-title section-title-flex">
             <AwardIcon /> Skills
           </h3>
           <NeighbourList items={detail.skills} emptyLabel="No skills attached." />
@@ -96,11 +92,11 @@ export default function TopicPage() {
       </div>
 
       {(t.goals?.length > 0 || detail.paths?.length > 0) && (
-        <div className="card-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', marginTop: 18 }}>
+        <div className="card-grid card-grid-280 mt-6">
           {t.goals?.length > 0 && (
             <div className="card card-pad">
               <h3 className="section-title">What you'll learn</h3>
-              <ul style={{ margin: 0, paddingLeft: 18, color: 'var(--ink-soft)', fontSize: 14, lineHeight: 1.9 }}>
+              <ul className="goals-list">
                 {t.goals.map((g, i) => <li key={i}>{g}</li>)}
               </ul>
             </div>
@@ -118,7 +114,7 @@ export default function TopicPage() {
       )}
 
       <h2 className="section-title mt-6">Neighbourhood map</h2>
-      <p className="muted" style={{ marginBottom: 12, fontSize: 14 }}>
+      <p className="page-note">
         Two hops of REQUIRES relationships around this topic. Scroll and drag to explore.
       </p>
       {graphLoading ? (

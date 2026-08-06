@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { useSearchParams, Link } from 'react-router-dom';
+import { useSearchParams, useLocation, Link } from 'react-router-dom';
 import {
   Sparkles,
   Clock,
@@ -11,6 +11,8 @@ import {
   Hourglass,
   BadgeCheck,
   UserCircle2,
+  LogIn,
+  UserPlus,
 } from 'lucide-react';
 import { useApi } from '../hooks/useApi.js';
 import { api } from '../api/client.js';
@@ -30,13 +32,12 @@ function StepStatus({ step }) {
 }
 
 export default function GeneratorPage() {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
+  const location = useLocation();
   const [searchParams] = useSearchParams();
   const initialTarget = searchParams.get('target') || '';
-  const initialUser = searchParams.get('user') || (user ? user.id : 'user-guest');
 
   const [targetId, setTargetId] = useState(initialTarget);
-  const [userId, setUserId] = useState(initialUser);
   const [result, setResult] = useState(null);
   const [generating, setGenerating] = useState(false);
   const [error, setError] = useState(null);
@@ -45,12 +46,6 @@ export default function GeneratorPage() {
   const autoRan = useRef(false);
 
   const { data: topics, loading: topicsLoading } = useApi(() => api.listTopics(), []);
-  const { data: users } = useApi(() => api.listUsers(), []);
-
-  // Default the learner selector to the signed-in account once it loads.
-  useEffect(() => {
-    if (user && userId === 'user-guest') setUserId(user.id);
-  }, [user, userId]);
 
   const grouped = useMemo(() => {
     const g = {};
@@ -62,11 +57,16 @@ export default function GeneratorPage() {
   }, [topics]);
 
   async function generate() {
-    if (!targetId) return;
+    if (!targetId || !user) return;
     setGenerating(true);
     setError(null);
     try {
-      const res = await api.generatePath({ targetId, userId: userId || null, completedTopicIds: [] });
+      // Paths are always personalised for the signed-in account.
+      const res = await api.generatePath({
+        targetId,
+        userId: user.id,
+        completedTopicIds: [],
+      });
       setResult(res);
     } catch (e) {
       setError(e);
@@ -130,6 +130,45 @@ export default function GeneratorPage() {
     return edges;
   }, [result]);
 
+  if (authLoading) return <Loading label="Checking session…" />;
+
+  if (!user) {
+    return (
+      <div>
+        <h1 className="page-title">Generate my path</h1>
+        <p className="page-sub">
+          Tell Pathfinder what you want to learn, and it will walk the graph to build a step-by-step
+          route — every prerequisite in the right order, personalised to what you've already
+          completed.
+        </p>
+
+        <div className="card card-pad mt-6 auth-gate">
+          <div className="auth-gate-icon">
+            <UserCircle2 size={22} />
+          </div>
+          <h2 className="section-title section-title-md">Sign in to generate your path</h2>
+          <p className="muted gate-sub">
+            Personalised paths use <strong>your</strong> progress in the graph, and completing topics
+            saves to your account — so we need to know who you are.
+          </p>
+          <div className="auth-gate-actions">
+            <Link to="/login" state={{ from: location.pathname + location.search }} className="btn btn-primary btn-green">
+              <LogIn size={15} /> Sign in
+            </Link>
+            <Link to="/register" state={{ from: location.pathname + location.search }} className="btn">
+              <UserPlus size={15} /> Create account
+            </Link>
+          </div>
+          {initialTarget && (
+            <p className="eyebrow muted gate-note">
+              Goal dipilih: <span className="mono">{initialTarget}</span> — dilanjutkan otomatis setelah login.
+            </p>
+          )}
+        </div>
+      </div>
+    );
+  }
+
   if (topicsLoading && !topics) return <Loading label="Loading topics…" />;
 
   return (
@@ -142,7 +181,7 @@ export default function GeneratorPage() {
       </p>
 
       <div className="card card-pad mt-6">
-        <div className="card-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))' }}>
+        <div className="card-grid card-grid-240">
           <div className="field">
             <label className="field-label" htmlFor="target">My goal</label>
             <select
@@ -163,47 +202,35 @@ export default function GeneratorPage() {
           </div>
 
           <div className="field">
-            <label className="field-label" htmlFor="learner">Learner</label>
-            <select
-              id="learner"
-              className="select"
-              value={userId}
-              onChange={(e) => setUserId(e.target.value)}
-            >
-              {user && (
-                <option value={user.id}>
-                  {user.name} (you) · {user.completedCount ?? 0} completed
-                </option>
-              )}
-              {(users || [])
-                .filter((u) => !user || u.id !== user.id)
-                .map((u) => (
-                  <option key={u.id} value={u.id}>
-                    {u.name} · {u.completedCount} completed
-                  </option>
-                ))}
-            </select>
-            {user && userId === user.id ? (
-              <span className="eyebrow" style={{ color: 'var(--accent-ink)', marginTop: 4 }}>
-                <UserCircle2 size={13} /> Personalised for your account — progress saves to the graph.
+            <label className="field-label">Learner</label>
+            <div className="learner-locked">
+              <span
+                className="avatar avatar-xs"
+                style={{ '--avatar-bg': user.avatarColor }}
+              >
+                {user.name
+                  .split(' ')
+                  .map((w) => w[0])
+                  .filter(Boolean)
+                  .slice(0, 2)
+                  .join('')
+                  .toUpperCase()}
               </span>
-            ) : !user ? (
-              <Link to="/login" className="eyebrow" style={{ color: 'var(--accent-ink)', marginTop: 4 }}>
-                Sign in to save your progress
-              </Link>
-            ) : (
-              <span className="eyebrow muted" style={{ marginTop: 4 }}>
-                Viewing as a demo learner
+              <span className="learner-locked-name">{user.name}</span>
+              <span className="pill status-ready">
+                <CheckCircle2 size={12} /> {user.completedCount ?? 0} completed
               </span>
-            )}
+            </div>
+            <span className="eyebrow learner-note">
+              <UserCircle2 size={13} /> Personalised for your account — progress saves to the graph.
+            </span>
           </div>
 
-          <div className="field" style={{ justifyContent: 'flex-end' }}>
+          <div className="field field-end">
             <button
-              className="btn btn-primary btn-block"
+              className="btn btn-primary btn-block mt-6"
               disabled={!targetId || generating}
               onClick={generate}
-              style={{ marginTop: 24 }}
             >
               {generating ? <Hourglass size={16} /> : <Sparkles size={16} />}
               {generating ? 'Planning route…' : 'Generate my path'}
@@ -213,7 +240,7 @@ export default function GeneratorPage() {
       </div>
 
       {error && (
-        <div className="card card-pad mt-6" style={{ borderColor: '#fecaca', background: '#fef2f2' }}>
+        <div className="card card-pad mt-6 card-error">
           <ErrorState message={error.message} onRetry={generate} compact />
         </div>
       )}
@@ -231,13 +258,12 @@ export default function GeneratorPage() {
       {result && (
         <div className="mt-6">
           <div className="flex items-center justify-between wrap gap-3">
-            <h2 className="section-title" style={{ marginBottom: 0 }}>
-              Your path to <span style={{ color: 'var(--accent-ink)' }}>{result.target.name}</span>
+            <h2 className="section-title section-title-flush">
+              Your path to <span className="accent-text">{result.target.name}</span>
             </h2>
             <Link
               to={`/topics/${result.target.id}`}
-              className="btn btn-sm"
-              style={{ marginBottom: 0 }}
+              className="btn btn-sm section-title-flush"
             >
               View goal <ArrowRight size={14} />
             </Link>
@@ -245,7 +271,7 @@ export default function GeneratorPage() {
 
           <div className="stat-grid mt-4">
             <div className="stat-card">
-              <div className="stat-icon" style={{ background: '#eef2ff', color: '#4f46e5' }}>
+              <div className="stat-icon stat-icon-sky">
                 <Target size={20} />
               </div>
               <div>
@@ -254,7 +280,7 @@ export default function GeneratorPage() {
               </div>
             </div>
             <div className="stat-card">
-              <div className="stat-icon" style={{ background: '#f0fdf4', color: '#059669' }}>
+              <div className="stat-icon stat-icon-green">
                 <PlayCircle size={20} />
               </div>
               <div>
@@ -263,7 +289,7 @@ export default function GeneratorPage() {
               </div>
             </div>
             <div className="stat-card">
-              <div className="stat-icon" style={{ background: '#fff7ed', color: '#c2410c' }}>
+              <div className="stat-icon stat-icon-orange">
                 <Clock size={20} />
               </div>
               <div>
@@ -272,7 +298,7 @@ export default function GeneratorPage() {
               </div>
             </div>
             <div className="stat-card">
-              <div className="stat-icon" style={{ background: '#eff6ff', color: '#0284c7' }}>
+              <div className="stat-icon stat-icon-blue">
                 <CheckCircle2 size={20} />
               </div>
               <div>
@@ -283,32 +309,30 @@ export default function GeneratorPage() {
           </div>
 
           {result.nextSuggestions.length > 0 && (
-            <div className="card card-pad mt-6" style={{ borderColor: '#d5daf0', background: 'linear-gradient(135deg,#fbfaff,#f5f3ff)' }}>
-              <div className="flex items-center gap-2" style={{ marginBottom: 12 }}>
-                <Sparkles size={16} style={{ color: 'var(--accent)' }} />
-                <h3 className="section-title" style={{ marginBottom: 0 }}>Recommended next step</h3>
+            <div className="card card-pad mt-6 card-recommend">
+              <div className="recommend-head">
+                <Sparkles size={16} className="icon-accent" />
+                <h3 className="section-title section-title-flush">Recommended next step</h3>
               </div>
               <div className="flex wrap gap-3">
                 {result.nextSuggestions.slice(0, 3).map((t, i) => (
                   <Link
                     key={t.id}
                     to={`/topics/${t.id}`}
-                    className="card card-pad card-hover"
-                    style={{ flex: '1 1 220px', borderColor: i === 0 ? '#c7d2fe' : 'var(--border)' }}
+                    className={`card card-pad card-hover recommend-item${i === 0 ? ' recommend-item-first' : ''}`}
                   >
                     {i === 0 && (
-                      <div className="eyebrow" style={{ color: 'var(--accent-ink)', marginBottom: 6 }}>
+                      <div className="eyebrow eyebrow-accent-sm">
                         Start with
                       </div>
                     )}
-                    <div style={{ fontWeight: 700, fontSize: 15 }}>{t.name}</div>
-                    <div className="muted" style={{ fontSize: 13, marginTop: 4 }}>
+                    <div className="suggestion-name">{t.name}</div>
+                    <div className="suggestion-summary">
                       {t.summary}
                     </div>
-                    {user && userId === user.id && i === 0 && (
+                    {user && i === 0 && (
                       <button
-                        className="btn btn-sm btn-primary mt-4"
-                        style={{ width: '100%' }}
+                        className="btn btn-sm btn-primary mt-4 btn-block"
                         disabled={marking === t.id}
                         onClick={(e) => {
                           e.preventDefault();
@@ -337,7 +361,7 @@ export default function GeneratorPage() {
           )}
 
           <h2 className="section-title mt-6">Route map</h2>
-          <p className="muted" style={{ marginBottom: 12, fontSize: 14 }}>
+          <p className="page-note">
             Fundamentals on the left, your goal on the right. Green topics are done, the orange one is
             your target, and an arrow points at what a topic depends on.
           </p>
@@ -353,13 +377,13 @@ export default function GeneratorPage() {
           <h2 className="section-title mt-6">Step by step</h2>
           <div className="card card-pad">
             {result.steps.map((s, i) => (
-              <Link to={`/topics/${s.id}`} key={s.id} className="row card-hover" style={{ borderRadius: 8 }}>
+              <Link to={`/topics/${s.id}`} key={s.id} className={`row card-hover row-rounded${s.isCompleted ? ' row-title-done' : ''}`}>
                 <span className="row-index">{i + 1}</span>
                 <div className="row-main">
-                  <div className="row-title" style={{ color: s.isCompleted ? 'var(--muted)' : undefined }}>
+                  <div className="row-title">
                     {s.topic.name}
                     {s.isTarget && (
-                      <span className="pill status-target" style={{ marginLeft: 8 }}>
+                      <span className="pill status-target pill-goal">
                         <Target size={11} /> goal
                       </span>
                     )}
@@ -369,7 +393,7 @@ export default function GeneratorPage() {
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="pill" style={{ background: '#f1f5f9', color: '#334155' }}>
+                  <span className="pill pill-neutral">
                     <Clock size={12} /> {formatHours(s.topic.estHours)}
                   </span>
                   <StepStatus step={s} />
