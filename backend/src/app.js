@@ -12,7 +12,16 @@ import { notFoundHandler, errorHandler } from './middleware/errorHandler.js';
 export function createApp() {
   const app = express();
 
-  app.use(cors({ origin: config.frontendOrigin }));
+  app.use(
+    cors({
+      origin(origin, callback) {
+        if (!origin || config.frontendOrigins.includes(origin)) return callback(null, true);
+        const err = new Error(`Origin ${origin} not allowed by CORS`);
+        err.status = 403;
+        return callback(err);
+      },
+    })
+  );
   app.use(express.json());
 
   app.use('/api/health', healthRouter);

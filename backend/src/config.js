@@ -2,9 +2,21 @@ import 'dotenv/config';
 
 const REQUIRED = ['NEO4J_URI', 'NEO4J_USER', 'NEO4J_PASSWORD'];
 
+/**
+ * Parse FRONTEND_ORIGIN into a list of allowed origins. Values may be
+ * comma-separated; trailing slashes are stripped because browsers send the
+ * Origin header without one (e.g. `https://site.netlify.app`).
+ */
+function parseOrigins(raw) {
+  return (raw || '')
+    .split(',')
+    .map((origin) => origin.trim().replace(/\/+$/, ''))
+    .filter(Boolean);
+}
+
 export const config = {
   port: Number(process.env.PORT || 4000),
-  frontendOrigin: process.env.FRONTEND_ORIGIN || 'http://localhost:5173',
+  frontendOrigins: parseOrigins(process.env.FRONTEND_ORIGIN || 'http://localhost:5173'),
   neo4j: {
     uri: process.env.NEO4J_URI || '',
     user: process.env.NEO4J_USER || '',
