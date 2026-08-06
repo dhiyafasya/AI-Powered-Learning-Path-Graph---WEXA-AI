@@ -66,6 +66,11 @@
   color: #fff;
 }
 
+/* Mobile-only menu button (rendered in the topbar) */
+.mobile-menu-btn {
+  display: none;
+}
+
 .brand-mark {
   width: 34px;
   height: 34px;
@@ -196,6 +201,10 @@
 .topbar-title {
   font-size: 18px;
   font-weight: 700;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .topbar-right {
@@ -203,6 +212,7 @@
   display: flex;
   align-items: center;
   gap: 12px;
+  flex-shrink: 0;
 }
 
 .content {

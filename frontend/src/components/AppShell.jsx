@@ -55,6 +55,11 @@ export default function AppShell() {
   const degraded = health && health.database === 'offline';
   const { user, loading: authLoading, logout } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  function closeMobileNav() {
+    setMobileOpen(false);
+  }
 
   function initials(name) {
     return name
@@ -68,7 +73,7 @@ export default function AppShell() {
 
   return (
     <div className={`app-shell${sidebarOpen ? '' : ' sidebar-collapsed'}`}>
-      <aside className="sidebar">
+      <aside className={`sidebar${mobileOpen ? ' mobile-open' : ''}`}>
         <div className="sidebar-head">
           <div className="brand">
             <div className="brand-text">
@@ -93,6 +98,7 @@ export default function AppShell() {
             to={item.to}
             end={item.end}
             className={({ isActive }) => `nav-item${isActive ? ' active' : ''}`}
+            onClick={closeMobileNav}
           >
             <item.icon size={17} />
             <span className="nav-label">{item.label}</span>
@@ -118,17 +124,19 @@ export default function AppShell() {
                   <div className="sidebar-user-sub">Learner</div>
                 </div>
               </div>
-              <button className="sidebar-logout" title="Sign out" onClick={logout}>
+              <button className="sidebar-logout" title="Sign out" onClick={() => { logout(); closeMobileNav(); }}>
                 <LogOut size={15} />
               </button>
             </>
           ) : (
-            <Link to="/login" className="btn btn-sm btn-block">
+            <Link to="/login" className="btn btn-sm btn-block" onClick={closeMobileNav}>
               <LogIn size={14} /> Sign in
             </Link>
           )}
         </div>
       </aside>
+
+      {mobileOpen && <div className="mobile-backdrop" onClick={closeMobileNav} />}
 
       <div className="main">
         {degraded && (
@@ -138,6 +146,14 @@ export default function AppShell() {
           </div>
         )}
         <div className="topbar">
+          <button
+            className="sidebar-burger mobile-menu-btn"
+            onClick={() => setMobileOpen((o) => !o)}
+            title={mobileOpen ? 'Close menu' : 'Open menu'}
+            aria-label="Toggle navigation"
+          >
+            {mobileOpen ? <X size={18} /> : <Menu size={18} />}
+          </button>
           <span className="topbar-title">{titleFor(location.pathname)}</span>
           <div className="topbar-right">
             <DbPill status={health?.database} />
