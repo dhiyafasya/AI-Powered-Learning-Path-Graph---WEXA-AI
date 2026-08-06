@@ -323,6 +323,8 @@ NEO4J_USER=cognodb
 NEO4J_PASSWORD=<the-generated-password>
 PORT=4000
 FRONTEND_ORIGIN=http://localhost:5173
+JWT_SECRET=<long-random-string>   # e.g. openssl rand -hex 48
+JWT_EXPIRES_IN=7d
 ```
 
 > `.env` is git-ignored. Only `.env.example` with placeholders is committed.
@@ -371,7 +373,41 @@ instance paused, env missing), the API returns clean `503` JSON and the UI shows
 - **18 skills** with `TEACHES` relationships.
 - **3 learning paths** (Web Developer, Data Scientist, Backend Engineer) with ordered `CONTAINS`
   relationships.
-- **4 learners** with realistic `COMPLETED` progress to power the personalised generator.
+- **4 learners** with realistic `COMPLETED` progress to power the personalised generator. Each seed
+  learner is also an **account** you can sign in with (email + password are hashed with bcrypt and
+  stored as `passwordHash` on the `User` node — plaintext is never persisted).
+
+---
+
+## Authentication
+
+Learners are real accounts. Browsing is public; **signing in** personalises path generation and
+lets you save progress back to the graph (`COMPLETED` edges on your own `User` node).
+
+- `POST /api/auth/register` — create an account (name, email, password ≥ 8 chars). Returns
+  `{ user, token }`. Your new learner node appears in the graph immediately.
+- `POST /api/auth/login` — returns `{ user, token }` (JWT, 7-day expiry).
+- `GET /api/auth/me` — restores the session; takes `Authorization: Bearer <token>`.
+- Protected: `POST /api/users/:id/progress` requires a valid token **and** `:id` must be your own
+  user (403 otherwise). `POST /api/paths/generate` falls back to your account when no `userId` is
+  sent.
+
+Tokens are sent via `Authorization: Bearer` and kept in `localStorage` by the frontend.
+
+### Demo accounts
+
+Every seed learner can sign in with password `password123`:
+
+| Email | Learner | Progress |
+| --- | --- | --- |
+| `amelia@example.com` | Amelia Chen | Frontend · 3 topics done |
+| `bima@example.com` | Bima Putra | Data science · 3 topics done |
+| `ciara@example.com` | Ciara O'Brien | Backend · 4 topics done |
+| `guest@example.com` | Guest Learner | none |
+
+The login page includes one-click buttons that pre-fill these credentials. If
+`JWT_SECRET` is missing, auth endpoints respond `503 AUTH_NOT_CONFIGURED` instead of
+crashing.
 
 ---
 
@@ -389,10 +425,13 @@ instance paused, env missing), the API returns clean `503` JSON and the UI shows
 | GET | `/api/catalog/topics/:id/subgraph` | Multi-hop neighbourhood (2–4 hops) |
 | GET | `/api/catalog/skills?demand=true` | Skills with taught-by + blocked-topics demand |
 | GET | `/api/catalog/graph` | Full topic graph (`topics` + `edges`) |
-| POST | `/api/paths/generate` | Generate personalised path `{targetId, userId?}` |
+| POST | `/api/paths/generate` | Generate personalised path `{targetId, userId?}` (authed fallback) |
+| POST | `/api/auth/register` | Create account → `{user, token}` |
+| POST | `/api/auth/login` | Sign in → `{user, token}` |
+| GET | `/api/auth/me` | Current user (Bearer token) |
 | GET | `/api/users` | List learners |
 | GET | `/api/users/:id` | Learner progress (completed topics, enrolled paths) |
-| POST | `/api/users/:id/progress` | Mark a topic complete `{topicId, score?}` |
+| POST | `/api/users/:id/progress` | Mark a topic complete `{topicId, score?}` (auth required, own user only) |
 
 Try the core one:
 
@@ -411,8 +450,9 @@ cd backend
 npm test
 ```
 
-7 tests cover the path engine: transitive prerequisite closure, topological ordering,
-completed-topic handling, readiness and next-step suggestions.
+12 tests cover the path engine (transitive prerequisite closure, topological ordering,
+completed-topic handling, readiness and next-step suggestions) plus the auth helpers (email/password
+validation, bcrypt hashing and JWT sign/verify).
 
 ---
 

@@ -181,6 +181,8 @@ export const seedUsers = [
   {
     id_user: 'user-amelia',
     name: 'Amelia Chen',
+    email: 'amelia@example.com',
+    password: 'password123',
     avatarColor: '#8b5cf6',
     focus: 'Frontend engineering',
     enrolledPathId: 'path-webdev',
@@ -189,6 +191,8 @@ export const seedUsers = [
   {
     id_user: 'user-bima',
     name: 'Bima Putra',
+    email: 'bima@example.com',
+    password: 'password123',
     avatarColor: '#0ea5e9',
     focus: 'Data science',
     enrolledPathId: 'path-data',
@@ -197,6 +201,8 @@ export const seedUsers = [
   {
     id_user: 'user-ciara',
     name: "Ciara O'Brien",
+    email: 'ciara@example.com',
+    password: 'password123',
     avatarColor: '#f59e0b',
     focus: 'Backend systems',
     enrolledPathId: 'path-backend',
@@ -205,6 +211,8 @@ export const seedUsers = [
   {
     id_user: 'user-guest',
     name: 'Guest Learner',
+    email: 'guest@example.com',
+    password: 'password123',
     avatarColor: '#64748b',
     focus: 'Exploring the graph',
     enrolledPathId: null,

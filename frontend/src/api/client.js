@@ -1,5 +1,16 @@
 const BASE = import.meta.env.VITE_API_BASE || '/api';
 
+const TOKEN_KEY = 'pathfinder.token';
+
+export function getToken() {
+  return localStorage.getItem(TOKEN_KEY);
+}
+
+export function setToken(token) {
+  if (token) localStorage.setItem(TOKEN_KEY, token);
+  else localStorage.removeItem(TOKEN_KEY);
+}
+
 export class ApiError extends Error {
   constructor(message, status, code, detail) {
     super(message);
@@ -11,10 +22,14 @@ export class ApiError extends Error {
 }
 
 async function request(path, options = {}) {
+  const headers = { 'Content-Type': 'application/json', ...(options.headers || {}) };
+  const token = getToken();
+  if (token) headers.Authorization = `Bearer ${token}`;
+
   let res;
   try {
     res = await fetch(`${BASE}${path}`, {
-      headers: { 'Content-Type': 'application/json', ...(options.headers || {}) },
+      headers,
       ...options,
     });
   } catch {
@@ -46,6 +61,12 @@ async function request(path, options = {}) {
 export const api = {
   health: () => request('/health'),
   stats: () => request('/catalog/stats'),
+
+  auth: {
+    register: (body) => request('/auth/register', { method: 'POST', body: JSON.stringify(body) }),
+    login: (body) => request('/auth/login', { method: 'POST', body: JSON.stringify(body) }),
+    me: () => request('/auth/me'),
+  },
 
   listPaths: () => request('/catalog/paths'),
   pathDetail: (pathId) => request(`/catalog/paths/${pathId}`),

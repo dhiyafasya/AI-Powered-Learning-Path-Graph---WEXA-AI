@@ -2,6 +2,7 @@ import { Suspense, lazy, useEffect, useState } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { DatabaseZap, Loader2 } from 'lucide-react';
 import { api } from './api/client.js';
+import { AuthProvider } from './context/AuthContext.jsx';
 import AppShell from './components/AppShell.jsx';
 import { Loading } from './components/States.jsx';
 
@@ -14,6 +15,8 @@ const GeneratorPage = lazy(() => import('./pages/GeneratorPage.jsx'));
 const ExplorerPage = lazy(() => import('./pages/ExplorerPage.jsx'));
 const SkillsPage = lazy(() => import('./pages/SkillsPage.jsx'));
 const LearnersPage = lazy(() => import('./pages/LearnersPage.jsx'));
+const LoginPage = lazy(() => import('./pages/LoginPage.jsx'));
+const RegisterPage = lazy(() => import('./pages/RegisterPage.jsx'));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage.jsx'));
 
 function DatabaseOffline({ onRetry }) {
@@ -76,21 +79,25 @@ export default function App() {
   }
 
   return (
-    <Suspense fallback={<Loading label="Loading page…" />}>
-      <Routes>
-        <Route element={<AppShell />}>
-          <Route index element={<HomePage />} />
-          <Route path="paths" element={<PathsPage />} />
-          <Route path="paths/:pathId" element={<PathDetailPage />} />
-          <Route path="topics" element={<TopicsPage />} />
-          <Route path="topics/:topicId" element={<TopicPage />} />
-          <Route path="generate" element={<GeneratorPage />} />
-          <Route path="explore" element={<ExplorerPage />} />
-          <Route path="skills" element={<SkillsPage />} />
-          <Route path="learners" element={<LearnersPage />} />
-          <Route path="*" element={<NotFoundPage />} />
-        </Route>
-      </Routes>
-    </Suspense>
+    <AuthProvider>
+      <Suspense fallback={<Loading label="Loading page…" />}>
+        <Routes>
+          <Route element={<AppShell />}>
+            <Route index element={<HomePage />} />
+            <Route path="paths" element={<PathsPage />} />
+            <Route path="paths/:pathId" element={<PathDetailPage />} />
+            <Route path="topics" element={<TopicsPage />} />
+            <Route path="topics/:topicId" element={<TopicPage />} />
+            <Route path="generate" element={<GeneratorPage />} />
+            <Route path="explore" element={<ExplorerPage />} />
+            <Route path="skills" element={<SkillsPage />} />
+            <Route path="learners" element={<LearnersPage />} />
+            <Route path="login" element={<LoginPage />} />
+            <Route path="register" element={<RegisterPage />} />
+            <Route path="*" element={<NotFoundPage />} />
+          </Route>
+        </Routes>
+      </Suspense>
+    </AuthProvider>
   );
 }

@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import { config } from './config.js';
 import healthRouter from './routes/health.js';
+import authRouter from './routes/auth.js';
 import catalogRouter from './routes/catalog.js';
 import graphRouter from './routes/graph.js';
 import pathRouter from './routes/paths.js';
@@ -15,6 +16,7 @@ export function createApp() {
   app.use(express.json());
 
   app.use('/api/health', healthRouter);
+  app.use('/api/auth', authRouter);
   app.use('/api/catalog', catalogRouter);
   app.use('/api/graph', graphRouter);
   app.use('/api/paths', pathRouter);

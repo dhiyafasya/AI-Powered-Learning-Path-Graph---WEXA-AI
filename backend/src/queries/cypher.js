@@ -162,3 +162,31 @@ MERGE (u)-[c:COMPLETED]->(t)
 ON CREATE SET c.completedAt = datetime(), c.score = $score
 RETURN t.id_topic AS topicId
 `;
+
+/** Find a user by email (for login / duplicate checks). */
+export const USER_BY_EMAIL = `
+MATCH (u:User { email: $email })
+RETURN u { id: u.id_user, .name, .email, .avatarColor, .focus, .passwordHash } AS user
+`;
+
+/** Create a new registered learner. */
+export const USER_CREATE = `
+CREATE (u:User {
+  id_user: $id,
+  email: $email,
+  name: $name,
+  avatarColor: $avatarColor,
+  focus: $focus,
+  passwordHash: $passwordHash,
+  createdAt: datetime()
+})
+RETURN u { id: u.id_user, .name, .email, .avatarColor, .focus } AS user
+`;
+
+/** Fetch a user by id, without secrets. */
+export const USER_BY_ID = `
+MATCH (u:User { id_user: $id })
+OPTIONAL MATCH (u)-[:COMPLETED]->(t:Topic)
+RETURN u { id: u.id_user, .name, .email, .avatarColor, .focus } AS user,
+       count(DISTINCT t) AS completedCount
+`;

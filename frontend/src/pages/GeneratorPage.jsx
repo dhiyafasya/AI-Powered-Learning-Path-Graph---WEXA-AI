@@ -9,9 +9,12 @@ import {
   Lock,
   ArrowRight,
   Hourglass,
+  BadgeCheck,
+  UserCircle2,
 } from 'lucide-react';
 import { useApi } from '../hooks/useApi.js';
 import { api } from '../api/client.js';
+import { useAuth } from '../context/AuthContext.jsx';
 import { Loading, ErrorState, EmptyState } from '../components/States.jsx';
 import GraphCanvas from '../components/GraphCanvas.jsx';
 import { formatHours } from '../lib/format.js';
@@ -27,19 +30,27 @@ function StepStatus({ step }) {
 }
 
 export default function GeneratorPage() {
+  const { user } = useAuth();
   const [searchParams] = useSearchParams();
   const initialTarget = searchParams.get('target') || '';
-  const initialUser = searchParams.get('user') || 'user-guest';
+  const initialUser = searchParams.get('user') || (user ? user.id : 'user-guest');
 
   const [targetId, setTargetId] = useState(initialTarget);
   const [userId, setUserId] = useState(initialUser);
   const [result, setResult] = useState(null);
   const [generating, setGenerating] = useState(false);
   const [error, setError] = useState(null);
+  const [justCompleted, setJustCompleted] = useState(null);
+  const [marking, setMarking] = useState(null);
   const autoRan = useRef(false);
 
   const { data: topics, loading: topicsLoading } = useApi(() => api.listTopics(), []);
   const { data: users } = useApi(() => api.listUsers(), []);
+
+  // Default the learner selector to the signed-in account once it loads.
+  useEffect(() => {
+    if (user && userId === 'user-guest') setUserId(user.id);
+  }, [user, userId]);
 
   const grouped = useMemo(() => {
     const g = {};
@@ -62,6 +73,21 @@ export default function GeneratorPage() {
       setResult(null);
     } finally {
       setGenerating(false);
+    }
+  }
+
+  async function handleMarkComplete(topicId) {
+    if (!user) return;
+    setMarking(topicId);
+    setError(null);
+    try {
+      await api.markComplete(user.id, topicId);
+      setJustCompleted(topicId);
+      await generate();
+    } catch (e) {
+      setError(e);
+    } finally {
+      setMarking(null);
     }
   }
 
@@ -144,12 +170,32 @@ export default function GeneratorPage() {
               value={userId}
               onChange={(e) => setUserId(e.target.value)}
             >
-              {(users || []).map((u) => (
-                <option key={u.id} value={u.id}>
-                  {u.name} · {u.completedCount} completed
+              {user && (
+                <option value={user.id}>
+                  {user.name} (you) · {user.completedCount ?? 0} completed
                 </option>
-              ))}
+              )}
+              {(users || [])
+                .filter((u) => !user || u.id !== user.id)
+                .map((u) => (
+                  <option key={u.id} value={u.id}>
+                    {u.name} · {u.completedCount} completed
+                  </option>
+                ))}
             </select>
+            {user && userId === user.id ? (
+              <span className="eyebrow" style={{ color: 'var(--accent-ink)', marginTop: 4 }}>
+                <UserCircle2 size={13} /> Personalised for your account — progress saves to the graph.
+              </span>
+            ) : !user ? (
+              <Link to="/login" className="eyebrow" style={{ color: 'var(--accent-ink)', marginTop: 4 }}>
+                Sign in to save your progress
+              </Link>
+            ) : (
+              <span className="eyebrow muted" style={{ marginTop: 4 }}>
+                Viewing as a demo learner
+              </span>
+            )}
           </div>
 
           <div className="field" style={{ justifyContent: 'flex-end' }}>
@@ -259,6 +305,31 @@ export default function GeneratorPage() {
                     <div className="muted" style={{ fontSize: 13, marginTop: 4 }}>
                       {t.summary}
                     </div>
+                    {user && userId === user.id && i === 0 && (
+                      <button
+                        className="btn btn-sm btn-primary mt-4"
+                        style={{ width: '100%' }}
+                        disabled={marking === t.id}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          handleMarkComplete(t.id);
+                        }}
+                      >
+                        {marking === t.id ? (
+                          <Hourglass size={13} />
+                        ) : justCompleted === t.id ? (
+                          <BadgeCheck size={13} />
+                        ) : (
+                          <CheckCircle2 size={13} />
+                        )}
+                        {marking === t.id
+                          ? 'Saving…'
+                          : justCompleted === t.id
+                            ? 'Saved to the graph'
+                            : 'Mark as complete'}
+                      </button>
+                    )}
                   </Link>
                 ))}
               </div>

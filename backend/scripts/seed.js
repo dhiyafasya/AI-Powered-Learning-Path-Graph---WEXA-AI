@@ -10,6 +10,7 @@
  *   npm run seed:reset     # wipe graph, then upsert
  */
 import 'dotenv/config';
+import bcrypt from 'bcryptjs';
 import neo4j from 'neo4j-driver';
 import { config, hasDatabaseConfig, missingDatabaseConfig } from '../src/config.js';
 import { seedTopics, seedPaths, seedSkills, seedUsers, REQUIRES } from './seedData.js';
@@ -44,6 +45,14 @@ async function main() {
   if (reset) {
     console.log('[seed] --reset: wiping graph…');
     await run('MATCH (n) DETACH DELETE n');
+  }
+
+  // 0. Uniqueness constraint on account emails (best-effort) --------------
+  try {
+    await run('CREATE CONSTRAINT user_email_unique IF NOT EXISTS FOR (u:User) REQUIRE u.email IS UNIQUE');
+    console.log('[seed] Uniqueness constraint on User.email ensured.');
+  } catch (err) {
+    console.warn(`[seed] Could not create uniqueness constraint (${err.message}). Registrations still check duplicates first.`);
   }
 
   // 1. Topics ------------------------------------------------------------
@@ -118,11 +127,16 @@ async function main() {
   // 5. Learners + progress ------------------------------------------------
   let completedCount = 0;
   for (const u of seedUsers) {
+    const passwordHash = await bcrypt.hash(u.password, 10);
     await run(
       `MERGE (u:User { id_user: $id })
        ON CREATE SET u.createdAt = datetime()
-       SET u.name = $name, u.avatarColor = $avatarColor, u.focus = $focus`,
-      { id: u.id_user, ...u }
+       SET u.name = $name,
+           u.email = $email,
+           u.passwordHash = $passwordHash,
+           u.avatarColor = $avatarColor,
+           u.focus = $focus`,
+      { id: u.id_user, name: u.name, email: u.email, passwordHash, avatarColor: u.avatarColor, focus: u.focus }
     );
     if (u.enrolledPathId) {
       await run(

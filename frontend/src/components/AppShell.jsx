@@ -1,4 +1,4 @@
-import { NavLink, Outlet, useLocation } from 'react-router-dom';
+import { NavLink, Outlet, Link, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard,
   Route,
@@ -10,9 +10,12 @@ import {
   Database,
   DatabaseZap,
   CircleDashed,
+  LogIn,
+  LogOut,
 } from 'lucide-react';
 import { useApi } from '../hooks/useApi.js';
 import { api } from '../api/client.js';
+import { useAuth } from '../context/AuthContext.jsx';
 
 const NAV = [
   { to: '/', label: 'Dashboard', icon: LayoutDashboard, end: true },
@@ -51,6 +54,17 @@ export default function AppShell() {
   const location = useLocation();
   const { data: health } = useApi(() => api.health(), []);
   const degraded = health && health.database === 'offline';
+  const { user, loading: authLoading, logout } = useAuth();
+
+  function initials(name) {
+    return name
+      .split(' ')
+      .map((w) => w[0])
+      .filter(Boolean)
+      .slice(0, 2)
+      .join('')
+      .toUpperCase();
+  }
 
   return (
     <div className="app-shell">
@@ -104,6 +118,24 @@ export default function AppShell() {
           <span className="topbar-title">{titleFor(location.pathname)}</span>
           <div className="topbar-right">
             <DbPill status={health?.database} />
+            {authLoading ? (
+              <span className="pill" style={{ background: '#f1f5f9', color: '#64748b' }}>
+                <CircleDashed size={12} /> session…</span>
+            ) : user ? (
+              <div className="topbar-user">
+                <span className="avatar" style={{ width: 28, height: 28, fontSize: 12, background: user.avatarColor || '#6366f1' }}>
+                  {initials(user.name)}
+                </span>
+                <span className="topbar-user-name">{user.name}</span>
+                <button className="topbar-logout" title="Sign out" onClick={logout}>
+                  <LogOut size={14} />
+                </button>
+              </div>
+            ) : (
+              <Link to="/login" className="btn btn-sm">
+                <LogIn size={14} /> Sign in
+              </Link>
+            )}
           </div>
         </div>
         <div className="content">

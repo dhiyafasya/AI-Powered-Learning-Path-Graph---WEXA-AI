@@ -10,7 +10,16 @@ export const config = {
     user: process.env.NEO4J_USER || '',
     password: process.env.NEO4J_PASSWORD || '',
   },
+  auth: {
+    jwtSecret: process.env.JWT_SECRET || '',
+    jwtExpiresIn: process.env.JWT_EXPIRES_IN || '7d',
+  },
 };
+
+/** True when authentication can issue and verify tokens. */
+export function hasAuthConfig() {
+  return Boolean(config.auth.jwtSecret);
+}
 
 /** True only when every required database variable is present. */
 export function hasDatabaseConfig() {
