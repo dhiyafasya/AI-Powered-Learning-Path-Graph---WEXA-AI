@@ -60,8 +60,15 @@ export function AuthProvider({ children }) {
     setUser(null);
   }, []);
 
+  /** Re-fetch the current user from the API without a full reload. */
+  const refreshUser = useCallback(async () => {
+    const res = await api.auth.me();
+    setUser(res.user);
+    return res.user;
+  }, []);
+
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, register, logout, refreshUser }}>
       {children}
     </AuthContext.Provider>
   );

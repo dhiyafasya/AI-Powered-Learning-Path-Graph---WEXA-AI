@@ -31,8 +31,38 @@ function StepStatus({ step }) {
   return <span className="pill status-locked"><Lock size={12} /> locked</span>;
 }
 
+/**
+ * Returns a copy of `path` with `topicId` flipped to completed and the
+ * dependent stats recomputed — used for instant UI feedback while the
+ * server confirms in the background.
+ */
+function optimisticComplete(path, topicId) {
+  const steps = path.steps.map((s) =>
+    s.id === topicId
+      ? { ...s, isCompleted: true, isReady: false }
+      : {
+          ...s,
+          isReady: s.prerequisites.every(
+            (p) =>
+              p === topicId ||
+              path.steps.find((step) => step.id === p)?.isCompleted
+          ),
+        }
+  );
+  const completedTopics = steps.filter((s) => s.isCompleted).length;
+  return {
+    ...path,
+    steps,
+    stats: {
+      ...path.stats,
+      completedTopics,
+      remainingTopics: steps.length - completedTopics,
+    },
+  };
+}
+
 export default function GeneratorPage() {
-  const { user, loading: authLoading } = useAuth();
+  const { user, loading: authLoading, refreshUser } = useAuth();
   const location = useLocation();
   const [searchParams] = useSearchParams();
   const initialTarget = searchParams.get('target') || '';
@@ -56,9 +86,9 @@ export default function GeneratorPage() {
     return g;
   }, [topics]);
 
-  async function generate() {
+  async function generate({ silent = false } = {}) {
     if (!targetId || !user) return;
-    setGenerating(true);
+    if (!silent) setGenerating(true);
     setError(null);
     try {
       // Paths are always personalised for the signed-in account.
@@ -70,20 +100,24 @@ export default function GeneratorPage() {
       setResult(res);
     } catch (e) {
       setError(e);
-      setResult(null);
+      if (!silent) setResult(null);
     } finally {
       setGenerating(false);
     }
   }
 
+  /** Optimistically flip a step to completed, then reconcile with the server. */
   async function handleMarkComplete(topicId) {
     if (!user) return;
     setMarking(topicId);
     setError(null);
     try {
       await api.markComplete(user.id, topicId);
+      // Instant local update so the UI reacts immediately (no flicker).
+      setResult((prev) => (prev ? optimisticComplete(prev, topicId) : prev));
       setJustCompleted(topicId);
-      await generate();
+      // Reconcile progress count and path from the server in the background.
+      await Promise.all([refreshUser().catch(() => null), generate({ silent: true }).catch(() => null)]);
     } catch (e) {
       setError(e);
     } finally {
@@ -129,6 +163,8 @@ export default function GeneratorPage() {
     }
     return edges;
   }, [result]);
+
+  const refreshing = result != null && (generating || marking != null);
 
   if (authLoading) return <Loading label="Checking session…" />;
 
@@ -351,8 +387,7 @@ export default function GeneratorPage() {
                           ? 'Saving…'
                           : justCompleted === t.id
                             ? 'Saved to the graph'
-                            : 'Mark as complete'}
-                      </button>
+                            : 'Mark as complete'}                      </button>
                     )}
                   </Link>
                 ))}
