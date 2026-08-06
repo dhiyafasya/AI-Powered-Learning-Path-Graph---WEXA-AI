@@ -1,0 +1,29 @@
+{
+  "name": "learning-path-graph-backend",
+  "version": "1.0.0",
+  "description": "CognoDB (openCypher/Bolt) backed API for the AI-Powered Learning Path Graph",
+  "type": "module",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js",
+    "seed": "node scripts/seed.js",
+    "seed:reset": "node scripts/seed.js --reset",
+    "test": "node --test \"test/*.test.js\"",
+    "typecheck": "node --check src/index.js"
+  },
+  "keywords": [
+    "graph-database",
+    "congodb",
+    "opencypher",
+    "neo4j-driver",
+    "learning-path"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^5.1.0",
+    "neo4j-driver": "^5.26.0"
+  }
+}
